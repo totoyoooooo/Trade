@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.second.hand.trading.server.dao.ChatDao">
+    <insert id="createChat">
+    insert into sh_chat (id, user1_id, user2_id)
+    values (#{id}, #{user1_id}, #{user2_id})
+    </insert>
+    <select id="getChatList" resultType="ChatModel">
+        select id, user1_id, user2_id
+        from sh_chat
+        where user1_id = #{user_id} or user2_id = #{user_id}
+    </select>
+    <select id="getChatById" resultType="ChatModel">
+        select id, user1_id, user2_id
+        from sh_chat
+        where id = #{id}
+    </select>
+</mapper>

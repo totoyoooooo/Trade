@@ -30,6 +30,17 @@
 </template>
 
 <script>
+
+import { webSocket } from '@/api';
+
+    //保证所有消息只会同时显示一条
+    const show = {
+        lackParam: false,
+        accountNotExist: false,
+        passwordError: false,
+        error: false
+    }
+
     export default {
         name: "login",
         data() {
@@ -43,17 +54,61 @@
 
         methods: {
             login() {
+                if(this.userForm.accountNumber === '' || this.userForm.userPassword === ''){
+                        //账号或者密码为空，提示用户
+                        if(!show.lackParam){
+                            show.lackParam = true;
+                            this.$message.error({
+                                message: '账号或密码不能为空',
+                                onClose: () => {
+                                    show.lackParam = false;
+                                }  
+                            });
+                        }
+                        return;
+                }
                 this.$api.userLogin({
                     accountNumber: this.userForm.accountNumber,
                     userPassword: this.userForm.userPassword
                 }).then(res => {
-                    console.log(res);
-                    if (res.status_code === 1) {
+                    if (res.status_code === 200) {
                         res.data.signInTime=res.data.signInTime.substring(0,10);
+                        this.$webSocket.init("ws://localhost:8080/websocket/" + res.data.id);
                         this.$globalData.userInfo = res.data;
                         this.$router.replace({path: '/index'});
-                    } else {
-                        this.$message.error(res.msg);
+                    } else if(res.status_code === 400) {
+                        //密码错误，提示用户
+                        if(!show.passwordError){
+                            show.passwordError = true;
+                            this.$message.error({
+                                message: '密码错误,请重新输入',
+                                onClose: () => {
+                                    show.passwordError = false;
+                                }  
+                            });
+                        }
+                    } else if(res.status_code === 404){
+                        //账号不存在，提示用户
+                        if(!show.accountNotExist){
+                            show.accountNotExist = true;
+                            this.$message.error({
+                                message: "账号不存在,请注册",
+                                onClose: () => {
+                                    show.accountNotExist = false;
+                                }  
+                            });
+                        }
+                    }
+                }).catch(e => {
+                    //网络问题或者后端问题，提示用户
+                    if(!show.error){
+                        show.error = true;
+                        this.$message.error({
+                            message: "登录失败，网络异常！",
+                            onClose: () => {
+                                show.error = false;
+                            }  
+                        });
                     }
                 });
             },

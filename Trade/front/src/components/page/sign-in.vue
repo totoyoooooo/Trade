@@ -34,6 +34,11 @@
 </template>
 
 <script>
+    const show = {
+        lackParam: false,
+        passwordNotEqual: false,
+        userHasExist: false,
+    }
     export default {
         name: "sign-in",
         data(){
@@ -52,19 +57,33 @@
             },
             signIn(){
                 console.log(this.userInfo.nickname);
-                if(this.userInfo.accountNumber&&this.userInfo.userPassword&&this.userInfo.nickname){
-                    if(this.userInfo.userPassword!==this.userPassword2){
-                        this.$message.error('两次输入的密码不相同！');
+                if(this.userInfo.accountNumber && this.userInfo.userPassword && this.userInfo.nickname && this.userPassword2){
+                    if(this.userInfo.userPassword !== this.userPassword2){
+                        if(!show.passwordNotEqual){
+                            show.passwordNotEqual = true;
+                            this.$message.error({
+                            message: '两次输入的密码不相同！',
+                            onClose: () => {
+                                show.passwordNotEqual = false;
+                        }});
+                        }
                     }else {
                         this.$api.signIn(this.userInfo).then(res=>{
-                            if(res.status_code===1){
+                            if(res.status_code === 200){
                                 this.$message({
                                     message: '注册成功！',
                                     type: 'success'
                                 });
                                 this.$router.replace({path: '/login'});
                             }else {
-                                this.$message.error('注册失败，用户已存！');
+                                if(!show.userHasExist){
+                                    show.userHasExist = true;
+                                    this.$message.error({
+                                        message: '注册失败，用户已存在！',
+                                        onClose: () => {
+                                            show.userHasExist = false;
+                                    }});
+                                }
                             }
                         }).catch(e=>{
                             console.log(e);
@@ -72,7 +91,14 @@
                         })
                     }
                 }else{
-                    this.$message.error('注册信息未填写完整！');
+                    if(!show.lackParam){
+                        show.lackParam = true;
+                        this.$message.error({
+                            message: '注册信息未填写完整！',
+                            onClose: () => {
+                                show.lackParam = false;
+                        }});
+                    }
                 }
             }
         }

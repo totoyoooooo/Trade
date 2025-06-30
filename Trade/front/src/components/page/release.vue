@@ -130,6 +130,14 @@
                 }
             };
         },
+        created() {
+            const userId = this.getCookie && this.getCookie('shUserId');
+            if (!userId) {
+                this.$message.error('请先登录');
+                this.$router.push('/login');
+                return;
+            }
+        },  
         methods: {
             handleChange(value) {
                 console.log(value);
@@ -161,7 +169,7 @@
                     this.idleItemInfo.idleLabel&&
                     this.idleItemInfo.idlePrice){
                     this.$api.addIdleItem(this.idleItemInfo).then(res=>{
-                        if (res.status_code === 1) {
+                        if (res.status_code === 200) {
                             this.$message({
                                 message: '发布成功！',
                                 type: 'success'
@@ -181,6 +189,15 @@
             },
             handleExceed(files, fileList) {
                 this.$message.warning(`限制10张图片，本次选择了 ${files.length} 张图，共选择了 ${files.length + fileList.length} 张图`);
+            },
+            getCookie(cname){
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for(var i=0; i<ca.length; i++){
+                    var c = ca[i].trim();
+                    if (c.indexOf(name)===0) return c.substring(name.length,c.length);
+                }
+                return "";
             },
         }
     }

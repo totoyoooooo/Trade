@@ -1,4 +1,15 @@
 package com.second.hand.trading.server.service;
 
-public interface CHatMessageService {
+import com.second.hand.trading.server.model.ChatMessageModel;
+
+import java.util.List;
+
+public interface ChatMessageService {
+
+    int createChatMessage(ChatMessageModel chatMessageModel);
+
+    List<ChatMessageModel> getChatMessageByChatId(String chatId);
+
+    void readChatMessage(String chatId,Long senderId);
+
 }

@@ -43,7 +43,7 @@
                     adminPassword: this.userForm.adminPassword
                 }).then(res => {
                     console.log(res);
-                    if (res.status_code === 1) {
+                    if (res.status_code === 200) {
                         console.log(res);
                         this.$sta.isLogin = true;
                         this.$sta.adminName=res.data.adminName;

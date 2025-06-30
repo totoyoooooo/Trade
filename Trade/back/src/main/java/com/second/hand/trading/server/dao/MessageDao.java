@@ -2,6 +2,7 @@ package com.second.hand.trading.server.dao;
 
 import com.second.hand.trading.server.model.MessageModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface MessageDao {
     int updateByPrimaryKeySelective(MessageModel record);
 
     int updateByPrimaryKey(MessageModel record);
+
+    void clearUnread(Long userId);
 }

@@ -18,8 +18,7 @@ import java.io.OutputStream;
 @RestController
 public class FileController {
 
-    @Value("${userFilePath}")
-    private String userFilePath;
+    private String userFilePath = new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath() + "\\pic";
 
     @Value("${baseUrl}")
     private String baseUrl;
@@ -30,7 +29,7 @@ public class FileController {
     @PostMapping("/file")
     public ResultVo uploadFile(@RequestParam("file") MultipartFile multipartFile) {
         String uuid="file"+ IdFactoryUtil.getFileId();
-        String fileName= uuid+ multipartFile.getOriginalFilename();
+        String fileName= uuid + multipartFile.getOriginalFilename();
         try {
             if (fileService.uploadFile(multipartFile,fileName)) {
                 return ResultVo.success(baseUrl+"/image?imageName="+fileName);

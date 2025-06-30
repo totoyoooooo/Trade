@@ -29,11 +29,19 @@ public class UserServiceImpl implements UserService {
     /**
      * 登录，安全问题未解决
      * @param accountNumber
-     * @param userPassword
      * @return
      */
-    public UserModel userLogin(String accountNumber, String userPassword){
-        return userDao.userLogin(accountNumber,userPassword);
+    public UserModel getUserByAccountNumber(String accountNumber){
+        return userDao.getUserByAccountNumber(accountNumber);
+    }
+
+    /**
+     * 获取密码
+     * @param accountNumber
+     * @return
+     */
+    public String getPassword(String accountNumber){
+        return userDao.getPassword(accountNumber);
     }
 
     /**

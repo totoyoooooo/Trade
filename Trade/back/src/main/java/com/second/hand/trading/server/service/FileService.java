@@ -13,5 +13,5 @@ public interface FileService {
      * @return
      * @throws IOException
      */
-    boolean uploadFile(MultipartFile multipartFile,String fileName)throws IOException;
+    boolean uploadFile(MultipartFile multipartFile,String fileName) throws IOException;
 }

@@ -14,7 +14,9 @@ public interface UserDao {
 
     int insertSelective(UserModel record);
 
-    UserModel userLogin(@Param("accountNumber") String accountNumber, @Param("userPassword") String userPassword);
+    UserModel getUserByAccountNumber(@Param("accountNumber") String accountNumber);
+
+    String getPassword(@Param("accountNumber") String accountNumber);
 
     UserModel selectByPrimaryKey(Long id);
 

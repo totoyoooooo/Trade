@@ -260,7 +260,7 @@
         created() {
             if (!this.$globalData.userInfo.nickname) {
                 this.$api.getUserInfo().then(res => {
-                    if (res.status_code === 1) {
+                    if (res.status_code === 200) {
                         res.data.signInTime = res.data.signInTime.substring(0, 10);
                         console.log(res.data);
                         this.$globalData.userInfo = res.data;
@@ -281,7 +281,7 @@
             getMyFavorite(){
                 this.$api.getMyFavorite().then(res=>{
                     console.log('getMyFavorite',res);
-                    if (res.status_code === 1){
+                    if (res.status_code === 200){
                         for (let i = 0; i < res.data.length; i++) {
                             let pictureList = JSON.parse(res.data[i].idleItem.pictureList);
                             this.dataList[2].push({
@@ -299,7 +299,7 @@
             },
             getMySoldIdle(){
                 this.$api.getMySoldIdle().then(res=>{
-                    if (res.status_code === 1){
+                    if (res.status_code === 200){
                         console.log('getMySoldIdle',res.data);
                         for (let i = 0; i < res.data.length; i++) {
                             let pictureList = JSON.parse(res.data[i].idleItem.pictureList);
@@ -318,7 +318,7 @@
             },
             getMyOrder(){
                 this.$api.getMyOrder().then(res=>{
-                    if (res.status_code === 1){
+                    if (res.status_code === 200){
                         console.log('getMyOrder',res.data);
                         for (let i = 0; i < res.data.length; i++) {
                             let pictureList = JSON.parse(res.data[i].idleItem.pictureList);
@@ -338,7 +338,7 @@
             getIdleItemData() {
                 this.$api.getAllIdleItem().then(res => {
                     console.log(res);
-                    if (res.status_code === 1) {
+                    if (res.status_code === 200) {
                         for (let i = 0; i < res.data.length; i++) {
                             res.data[i].timeStr = res.data[i].releaseTime.substring(0, 10) + " " + res.data[i].releaseTime.substring(11, 19);
                             let pictureList = JSON.parse(res.data[i].pictureList);
@@ -354,7 +354,7 @@
             },
             getAddressData() {
                 this.$api.getAddress().then(res => {
-                    if (res.status_code === 1) {
+                    if (res.status_code === 200) {
                         let data = res.data;
                         for (let i = 0; i < data.length; i++) {
                             data[i].detailAddressText = data[i].provinceName + data[i].cityName + data[i].regionName + data[i].detailAddress;
@@ -387,7 +387,7 @@
                         oldPassword: this.userPassword1,
                         newPassword: this.userPassword2
                     }).then(res => {
-                        if (res.status_code === 1) {
+                        if (res.status_code === 200) {
                             this.userPasswordEdit = false;
                             this.$message({
                                 message: '修改成功！',
@@ -432,7 +432,7 @@
                     type: 'warning'
                 }).then(() => {
                     this.$api.deleteAddress(row).then(res => {
-                        if (res.status_code === 1) {
+                        if (res.status_code === 200) {
                             this.$message({
                                 message: '删除成功！',
                                 type: 'success'
@@ -481,7 +481,7 @@
                             idleStatus:2
                         }).then(res=>{
                             console.log(res);
-                            if(res.status_code===1){
+                            if(res.status_code===200){
                                 this.dataList[0].splice(index,1);
                                 item.idleStatus=2;
                                 this.dataList[1].unshift(item);
@@ -495,7 +495,7 @@
                             idleStatus:0
                         }).then(res=>{
                             console.log(res);
-                            if(res.status_code===1){
+                            if(res.status_code===200){
                                 this.dataList[1].splice(index,1);
                             }else {
                                 this.$message.error(res.msg)
@@ -506,7 +506,7 @@
                             id: item.favoriteId
                         }).then(res=>{
                             console.log(res);
-                            if(res.status_code===1){
+                            if(res.status_code===200){
                                 this.$message({
                                     message: '已取消收藏！',
                                     type: 'success'
@@ -536,7 +536,7 @@
             },
             update(data) {
                 this.$api.updateAddress(data).then(res => {
-                    if (res.status_code === 1) {
+                    if (res.status_code === 200) {
                         this.getAddressData();
                         this.$message({
                             message: '修改成功！',
@@ -569,7 +569,7 @@
                     } else {
                         console.log(this.addressInfo);
                         this.$api.addAddress(this.addressInfo).then(res => {
-                            if (res.status_code === 1) {
+                            if (res.status_code === 200) {
                                 this.getAddressData();
                                 this.$message({
                                     message: '新增成功！',

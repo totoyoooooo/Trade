@@ -8,8 +8,8 @@
 
 <script>
     export default {
-        name: "PageBody"
-    }
+        name: "PageBody",
+    };
 </script>
 
 <style scoped>

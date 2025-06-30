@@ -9,9 +9,10 @@
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="to_user" jdbcType="BIGINT" property="toUser" />
     <result column="to_message" jdbcType="BIGINT" property="toMessage" />
+    <result column="has_read" jdbcType="INTEGER" property="has_read" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, user_id, idle_id, content, create_time, to_user, to_message
+    id, user_id, idle_id, content, create_time, to_user, to_message, has_read
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -25,6 +26,10 @@
     from sh_message
     where to_user = #{userId,jdbcType=BIGINT} order by id desc
   </select>
+  <update id="clearUnread">
+    update sh_message set has_read = 1
+    where to_user = #{userId,jdbcType=BIGINT}
+  </update>
   <select id="getIdleMessage" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

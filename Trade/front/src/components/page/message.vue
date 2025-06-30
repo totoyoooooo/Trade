@@ -4,7 +4,9 @@
         <app-body>
             <div class="message-container">
                 <div class="message-container-title">我的消息</div>
-                <div v-for="(mes,index) in meslist" class="message-container-list" @click="toDetails(mes.idle.id)">
+                <div v-for="(mes,index) in meslist"
+                    class="message-container-list"
+                    @click="toDetails(mes.idle && mes.idle.id)">
                     <div class="message-container-list-left">
                         <el-image
                                 style="width: 55px; height: 55px;border-radius: 5px;"
@@ -47,26 +49,50 @@
             };
         },
         created(){
-            this.$api.getAllMyMessage().then(res=>{
-                console.log(res);
-                if(res.status_code===1){
-                    for(let i=0;i<res.data.length;i++){
-                        let imgList=JSON.parse(res.data[i].idle.pictureList);
-                        res.data[i].idle.imgUrl=imgList?imgList[0]:'';
-                        let contentList=res.data[i].content.split('<br>');
-                        let contenHtml=contentList[0];
-                        for(let i=1;i<contentList.length;i++){
-                            contenHtml+='  '+contentList[i];
+            this.$api.clearMessageUnread(
+                "id=" + this.getCookie("shUserId")
+            ).then(res=>{
+                this.$bus.$emit('new-leave-message');
+                this.$api.getAllMyMessage().then(res=>{
+                    console.log(res);
+                    if(res.status_code===200){
+                        for(let i=0;i<res.data.length;i++){
+                            if(res.data[i].idle && res.data[i].idle.pictureList){
+                                let imgList = JSON.parse(res.data[i].idle.pictureList);
+                                 res.data[i].idle.imgUrl = imgList ? imgList[0] : '';
+                            } else {
+                                res.data[i].idle = res.data[i].idle || {};
+                                res.data[i].idle.imgUrl = '';
+                            }
+                            let content = res.data[i].content || '';
+                            let contentList = content.split('<br>');
+                            let contenHtml = contentList[0];
+                            for(let j=1;j<contentList.length;j++){
+                                contenHtml += '  ' + contentList[j];
+                            }
+                            res.data[i].content = contenHtml;
                         }
-                        res.data[i].content=contenHtml;
+                        this.meslist=res.data;
                     }
-                    this.meslist=res.data;
-                }
-            })
+                })
+            });
         },
         methods:{
+            getCookie(cname){
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for(var i=0; i<ca.length; i++){
+                    var c = ca[i].trim();
+                    if (c.indexOf(name)===0) return c.substring(name.length,c.length);
+                }
+                return "";
+            },
             toDetails(id){
-                this.$router.push({path: '/details',query:{id:id}});
+                if (!id) {
+                    this.$message && this.$message.error('该留言没有关联的商品，无法跳转');
+                    return;
+                }
+                this.$router.push({path: '/details', query: {id}});
             }
         }
     }

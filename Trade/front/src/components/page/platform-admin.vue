@@ -80,7 +80,7 @@
             logout(){
                 this.$api.loginOut({
                 }).then(res => {
-                    if(res.status_code === 1){
+                    if(res.status_code === 200){
                         this.$sta.isLogin=false;
                         this.$sta.adminName='';
                         this.$router.push({path:'/login-admin'});

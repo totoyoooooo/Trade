@@ -17,10 +17,16 @@ public interface UserService {
     /**
      * 登录接口
      * @param accountNumber
-     * @param userPassword
      * @return
      */
-    UserModel userLogin(String accountNumber, String userPassword);
+    UserModel getUserByAccountNumber(String accountNumber);
+
+    /**
+     * 获取密码接口
+     * @param accountNumber
+     * @return
+     */
+    String getPassword(String accountNumber);
 
     /**
      * 注册接口

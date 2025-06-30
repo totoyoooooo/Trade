@@ -8,7 +8,7 @@
                         <el-image
                                 style="width: 80px; height: 80px;border-radius: 5px;"
                                 :src="idleItemInfo.user.avatar"
-                                fit="contain"></el-image>
+                                fit="contain" @click="toUserPage(idleItemInfo.userId)"></el-image>
                         <div style="margin-left: 10px;">
                             <div class="details-header-user-info-nickname">{{idleItemInfo.user.nickname}}</div>
                             <div class="details-header-user-info-time">{{idleItemInfo.user.signInTime.substring(0,10)}} 加入平台</div>
@@ -27,13 +27,33 @@
                 <div class="details-info">
                     <div class="details-info-title">{{idleItemInfo.idleName}}</div>
                     <div class="details-info-main" v-html="idleItemInfo.idleDetails">
-                        {{idleItemInfo.idleDetails}}
+                        
                     </div>
                     <div class="details-picture">
-                        <el-image v-for="(imgUrl,i) in idleItemInfo.pictureList"
-                                  style="width: 90%;margin-bottom: 2px;"
-                                  :src="imgUrl"
-                                  fit="contain"></el-image>
+                        <el-image
+                            v-for="(imgUrl, i) in idleItemInfo.pictureList"
+                            :key="i"
+                            style="width: 90%;margin-bottom: 2px; cursor: pointer;"
+                            :src="imgUrl"
+                            fit="contain"
+                            :preview-src-list="[]"
+                            @click.native="openPreview(i)"
+                        ></el-image>
+                        <el-dialog
+                            :visible.sync="previewVisible"
+                            width="60%"
+                            top="5vh"
+                            :show-close="false"
+                            @close="closePreview"
+                            v-if="previewVisible"
+                            class="image-preview-dialog"
+                        >
+                            <img
+                                :src="idleItemInfo.pictureList[previewIndex]"
+                                style="width: 100%; cursor: zoom-out;"
+                                @click="closePreview"
+                            />
+                        </el-dialog>
                     </div>
                 </div>
 
@@ -67,7 +87,7 @@
                                         {{mes.toU.nickname?' @'+mes.toU.nickname+'：'+
                                         mes.toM.content.substring(0,10)+
                                         (mes.toM.content.length>10?'...':''):''}}</div>
-                                    <div class="message-content" v-html="mes.content">{{mes.content}}</div>
+                                    <div class="message-content" v-html="mes.content"></div>
                                     <div class="message-time">{{mes.createTime}}</div>
                                 </div>
                             </div>
@@ -87,6 +107,7 @@
     import AppHead from '../common/AppHeader.vue';
     import AppBody from '../common/AppPageBody.vue'
     import AppFoot from '../common/AppFoot.vue'
+import { data } from 'jquery';
 
     export default {
         name: "idle-details",
@@ -124,7 +145,9 @@
                 },
                 isMaster:false,
                 isFavorite:true,
-                favoriteId:0
+                favoriteId:0,
+                previewVisible: false,
+                previewIndex: 0,
             };
         },
         created(){
@@ -163,7 +186,7 @@
                     idleId:this.idleItemInfo.id
                 }).then(res=>{
                     console.log('getAllIdleMessage',res.data);
-                    if(res.status_code===1){
+                    if(res.status_code===200){
                         this.messageList=res.data;
                     }
                 }).catch(()=>{
@@ -206,7 +229,7 @@
                     idleStatus:status
                 }).then(res=>{
                     console.log(res);
-                    if(res.status_code===1){
+                    if(res.status_code===200){
                         this.idleItemInfo.idleStatus=status;
                     }else {
                         this.$message.error(res.msg)
@@ -219,7 +242,7 @@
                     orderPrice:idleItemInfo.idlePrice,
                 }).then(res=>{
                     console.log(res);
-                    if(res.status_code===1){
+                    if(res.status_code===200){
                         this.$router.push({path: '/order', query: {id: res.data.id}});
                     }else {
                         this.$message.error(res.msg)
@@ -234,7 +257,7 @@
                         id: this.favoriteId
                     }).then(res=>{
                         console.log(res);
-                        if(res.status_code===1){
+                        if(res.status_code===200){
                             this.$message({
                                 message: '已取消收藏！',
                                 type: 'success'
@@ -250,7 +273,7 @@
                         idleId:idleItemInfo.id
                     }).then(res=>{
                         console.log(res);
-                        if(res.status_code===1){
+                        if(res.status_code===200){
                             this.$message({
                                 message: '已收藏！',
                                 type: 'success'
@@ -288,7 +311,14 @@
                         toUser:this.toUser,
                         toMessage:this.toMessage
                     }).then(res=>{
-                        if(res.status_code===1){
+                        if(res.status_code===200){
+                            this.$webSocket.sendMessage({
+                                target: this.idleItemInfo.userId,
+                                data:{
+                                    type: "message",
+                                    content: "通知",
+                                }
+                            });
                             this.$message({
                                 message: '留言成功！',
                                 type: 'success'
@@ -306,7 +336,23 @@
                 }else{
                     this.$message.error("留言为空！");
                 }
-            }
+            }, 
+            toUserPage(userId){
+                if(userId == this.getCookie('shUserId')){
+                    this.$router.push({ path: '/me' });
+                }else{
+                    this.$router.push({ path: '/user', query: {id: userId} });
+                }
+            },
+            openPreview(index) {
+                if (!this.previewVisible) {
+                    this.previewIndex = index;
+                    this.previewVisible = true;
+                }
+            },
+            closePreview() {
+                this.previewVisible = false;
+            },
         },
     }
 </script>
@@ -426,5 +472,9 @@
     .message-time{
         font-size: 13px;
         color: #555555;
+    }
+    .details-header-user-info el-image,
+    .details-header-user-info .el-image {
+        cursor: pointer;
     }
 </style>

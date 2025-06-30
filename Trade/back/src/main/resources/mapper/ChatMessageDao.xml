@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.second.hand.trading.server.dao.ChatMessageDao">
+    <insert id="createChatMessage">
+        insert into sh_chat_message (chat_id,sender_id,content,send_time)
+        values (#{chat_id}, #{sender_id}, #{content}, #{send_time})
+    </insert>
+    <select id="getChatMessageByChatId" resultType="ChatMessageModel">
+        select *
+        from sh_chat_message
+        where chat_id = #{chat_id}
+    </select>
+    <select id="getChatMessageById" resultType="ChatMessageModel">
+        select *
+        from sh_chat_message
+        where id = #{id}
+    </select>
+    <update id="readChatMessage">
+        update sh_chat_message set has_read = 1
+        where chat_id = #{chat_id} and sender_id != #{sender_id}
+    </update>
+</mapper>

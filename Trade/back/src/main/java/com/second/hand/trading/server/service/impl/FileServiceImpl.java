@@ -12,8 +12,7 @@ import java.io.IOException;
 @Service
 public class FileServiceImpl implements FileService {
 
-    @Value("${userFilePath}")
-    private String userFilePath;
+    private String userFilePath = new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath() + "\\pic";
 
     public boolean uploadFile(MultipartFile multipartFile,String fileName)throws IOException {
         File fileDir = new File(userFilePath);
@@ -22,7 +21,6 @@ public class FileServiceImpl implements FileService {
                 return false;
             }
         }
-//        System.out.println(fileDir.getAbsolutePath() +"/"+fileName);
         File file = new File(fileDir.getAbsolutePath() +"/"+fileName);
         if (file.exists()) {
             if (!file.delete()) {

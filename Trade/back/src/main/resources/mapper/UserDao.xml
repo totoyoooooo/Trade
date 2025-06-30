@@ -13,10 +13,15 @@
   <sql id="Base_Column_List">
     id, account_number, nickname, avatar, sign_in_time, user_status
   </sql>
-  <select id="userLogin" resultMap="BaseResultMap">
+  <select id="getUserByAccountNumber" resultMap="BaseResultMap">
     select id, account_number, nickname, avatar, sign_in_time, user_status
     from sh_user
-    where account_number = #{accountNumber} and user_password = #{userPassword}
+    where account_number = #{accountNumber}
+  </select>
+  <select id="getPassword" parameterType="String" resultType="String">
+    select user_password
+    from sh_user
+    where account_number = #{accountNumber}
   </select>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 

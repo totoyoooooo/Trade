@@ -11,16 +11,6 @@
                 <el-tab-pane label="图书" name="4"></el-tab-pane>
                 <el-tab-pane label="其他" name="5"></el-tab-pane>
             </el-tabs>
-
-             <!--<el-menu  mode="horizontal" @select="handleSelect">
-                    <el-menu-item >全部</el-menu-item>
-                    <el-submenu ><template slot="title">数码</template></el-submenu>
-                    <el-submenu><template slot="title">家电</template></el-submenu>
-                    <el-submenu><template slot="title">户外</template></el-submenu>
-                    <el-submenu><template slot="title">图书</template></el-submenu>
-                    <el-submenu><template slot="title">其他</template></el-submenu>
-
-              </el-menu>-->
             <div style="margin: 0 20px;">
                 <el-row :gutter="30">
                     <el-col :span="6" v-for="(idle,index) in idleList">
@@ -118,18 +108,19 @@
                     spinner: 'el-icon-loading',
                     background: 'rgba(0, 0, 0, 0)'
                 });
-                if(this.labelName>0){
+                if(this.labelName > 0){
                     this.$api.findIdleTiemByLable({
                         idleLabel:this.labelName,
                         page: page,
                         nums: 8
                     }).then(res => {
-                        console.log(res);
+                        //console.log(res);
                         let list = res.data.list;
                         for (let i = 0; i < list.length; i++) {
                             list[i].timeStr = list[i].releaseTime.substring(0, 10) + " " + list[i].releaseTime.substring(11, 19);
                             let pictureList = JSON.parse(list[i].pictureList);
                             list[i].imgUrl = pictureList.length > 0 ? pictureList[0] : '';
+                            console.log(list[i].imgUrl);
                         }
                         this.idleList = list;
                         this.totalItem=res.data.count;
@@ -150,6 +141,7 @@
                             list[i].timeStr = list[i].releaseTime.substring(0, 10) + " " + list[i].releaseTime.substring(11, 19);
                             let pictureList = JSON.parse(list[i].pictureList);
                             list[i].imgUrl = pictureList.length > 0 ? pictureList[0] : '';
+                            console.log(list[i].imgUrl);
                         }
                         this.idleList = list;
                         this.totalItem=res.data.count;

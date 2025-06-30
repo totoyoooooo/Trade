@@ -12,7 +12,12 @@
                 </el-input>
             </div>
             <el-button type="primary" icon="el-icon-plus"  @click="toRelease">物品发布</el-button>
-            <el-button type="primary" icon="el-icon-chat-dot-round" @click="toMessage">消息</el-button>
+            <el-badge :value="unreadTotal" :hidden="!unreadTotal">
+                <el-button type="primary" icon="el-icon-chat-dot-round" @click="toChat">私信</el-button>
+            </el-badge>
+            <el-badge :value="unreadMessageTotal" :hidden="!unreadMessageTotal">
+                <el-button type="primary" icon="el-icon-chat-dot-round" @click="toMessage">留言消息</el-button>
+            </el-badge>
             <router-link v-if="!isLogin" class="user-name-text" to="/login">登录</router-link>
             <el-dropdown trigger="click" v-else>
                 <div style="cursor:pointer;display: flex;align-items: center;">
@@ -37,26 +42,42 @@
                 searchValue: this.searchInput,
                 nickname:'登录',
                 avatar:'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-                isLogin:false
+                isLogin:false,
+                unreadTotal: 0,
+                unreadMessageTotal: 0
             };
+        },
+        mounted() {
+            // console.log("header mounted");
+            this.getUnreadTotal();
+            this.getUnreadMessageTotal();
+            this.$bus.$on('new-message', this.getUnreadTotal);
+            this.$bus.$on('new-leave-message', this.getUnreadMessageTotal);
+        },
+        beforeDestroy() {
+            // console.log("header beforeDestroy");
+            this.$bus.$off('new-message', this.getUnreadTotal);
+            this.$bus.$off('new-leave-message', this.getUnreadMessageTotal);
         },
         created(){
             // console.log("header");
-            if(! this.$globalData.userInfo.nickname){
+            if(!this.$globalData.userInfo.nickname){
                 this.$api.getUserInfo().then(res=>{
                     console.log('Header getUserInfo:',res);
-                    if(res.status_code===1){
+                    if(res.status_code===200){
                         this.nickname=res.data.nickname;
                         this.avatar=res.data.avatar;
                         res.data.signInTime=res.data.signInTime.substring(0,10);
                         this.$globalData.userInfo=res.data;
                         this.isLogin=true;
+                        this.$webSocket.init("ws://localhost:8080/websocket/" + res.data.id);
                     }
                 })
             }else {
                 this.nickname=this.$globalData.userInfo.nickname;
                 this.avatar=this.$globalData.userInfo.avatar;
                 this.isLogin=true;
+                this.$webSocket.init("ws://localhost:8080/websocket/" + this.$globalData.userInfo.id);
             }
         },
         methods: {
@@ -69,9 +90,27 @@
                 }
 
             },
+            getUnreadTotal() {
+                this.$api.getChatList("userId=" + this.getCookie('shUserId') + "&type=-1").then(res => {
+                if (res.status_code === 200) {
+                    this.unreadTotal = res.data.reduce((sum, chat) => sum + (chat.unread || 0), 0);
+                }});
+            },
+            getUnreadMessageTotal() {
+                this.$api.getAllMyMessage().then(res => {
+                    if (res.status_code === 200) {
+                        this.unreadMessageTotal = res.data.filter(msg => !msg.has_read).length;
+                    }
+                });
+            },
             toMe() {
                 if ('/me' !== this.$route.path) {
                     this.$router.push({path: '/me'});
+                }
+            },
+            toChat(){
+                if ('/chat' !== this.$route.path) {
+                    this.$router.push({path: '/chat'});
                 }
             },
             toMessage(){
@@ -84,9 +123,18 @@
                     this.$router.push({path: '/release'});
                 }
             },
+            getCookie(cname){
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for(var i=0; i<ca.length; i++){
+                    var c = ca[i].trim();
+                    if (c.indexOf(name)===0) return c.substring(name.length,c.length);
+                }
+                return "";
+            },
             loginOut(){
                 this.$api.logout().then(res=>{
-                    if(res.status_code===1){
+                    if(res.status_code===200){
                         this.$globalData.userInfo={};
                         console.log("login out");
                         if ('/index' === this.$route.path) {
@@ -100,7 +148,7 @@
                 });
 
             }
-        }
+        },
     };
 </script>
 <style scoped>
@@ -141,5 +189,8 @@
         color: #409EFF;
         cursor: pointer;
         text-decoration: none;
+    }
+    .el-badge {
+        margin-right: 8px;
     }
 </style>

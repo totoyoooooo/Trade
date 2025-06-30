@@ -51,6 +51,8 @@ public class MessageModel implements Serializable {
 
     private MessageModel toM;
 
+    private int has_read;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -141,6 +143,14 @@ public class MessageModel implements Serializable {
         this.toM = toM;
     }
 
+    public int getHas_read() {
+        return has_read;
+    }
+
+    public void setHas_read(int has_read) {
+        this.has_read = has_read;
+    }
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -190,6 +200,7 @@ public class MessageModel implements Serializable {
         sb.append(", toUser=").append(toUser);
         sb.append(", toMessage=").append(toMessage);
         sb.append(", serialVersionUID=").append(serialVersionUID);
+        sb.append(", has_read=").append(has_read);
         sb.append("]");
         return sb.toString();
     }

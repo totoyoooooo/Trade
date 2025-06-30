@@ -41,4 +41,6 @@ public interface MessageService {
      */
     List<MessageModel> getAllIdleMessage(Long idleId);
 
+    void clearUnread(Long id);
+
 }

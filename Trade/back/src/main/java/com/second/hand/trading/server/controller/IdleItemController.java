@@ -88,4 +88,10 @@ public class IdleItemController {
         }
         return ResultVo.fail(ErrorMsg.SYSTEM_ERROR);
     }
+
+    @PostMapping("getUserIdle")
+    public ResultVo getUserIdleItem(@RequestParam Long id){
+        return ResultVo.success(idleItemService.getAllIdelItem(id));
+    }
+
 }

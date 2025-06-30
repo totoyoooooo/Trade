@@ -133,7 +133,7 @@
                 id: orderId
             }).then(res => {
                 console.log(res);
-                if (res.status_code === 1) {
+                if (res.status_code === 200) {
                     if (res.data.idleItem) {
                         let imgList = JSON.parse(res.data.idleItem.pictureList);
                         if (imgList.length > 0) {
@@ -185,7 +185,7 @@
             },
             getAddressData(){
                 this.$api.getAddress().then(res => {
-                    if (res.status_code === 1) {
+                    if (res.status_code === 200) {
                         let data = res.data;
                         for (let i = 0; i < data.length; i++) {
                             data[i].detailAddressText = data[i].provinceName + data[i].cityName + data[i].regionName + data[i].detailAddress;
@@ -222,7 +222,7 @@
                         consigneePhone:item.consigneePhone,
                         detailAddress:item.detailAddressText
                     }).then(res=>{
-                        if(res.status_code===1){
+                        if(res.status_code===200){
                             this.addressInfo.update=true;
                             this.addressInfo.id=res.data.id;
                         }else {
@@ -249,7 +249,7 @@
                                 paymentStatus: 1,
                                 paymentWay: '支付宝',
                             }).then(res => {
-                                if (res.status_code === 1) {
+                                if (res.status_code === 200) {
                                     this.$message({
                                         message: '支付成功！',
                                         type: 'success'
@@ -268,7 +268,7 @@
                         id: orderInfo.id,
                         orderStatus: orderStatus,
                     }).then(res => {
-                        if (res.status_code === 1) {
+                        if (res.status_code === 200) {
                             this.$message({
                                 message: '操作成功！',
                                 type: 'success'

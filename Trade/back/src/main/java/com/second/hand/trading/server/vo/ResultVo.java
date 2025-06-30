@@ -10,6 +10,11 @@ import com.second.hand.trading.server.enums.ErrorMsg;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ResultVo<T> {
 
+    private static final int ACCOUNTNOTEXIST = 404;
+    private static final int ERROR = 400;
+    private static final int SUCCESS = 200;
+
+
     private Integer status_code;
     private String msg;
     private T data;
@@ -17,22 +22,29 @@ public class ResultVo<T> {
     //直接返回成功状态码
     public static ResultVo success(){
         ResultVo resultVo=new ResultVo();
-        resultVo.setStatus_code(1);
+        resultVo.setStatus_code(SUCCESS);
         return resultVo;
     }
 
     //返回成功状态码的同时返回对象
     public static <T>ResultVo success(T data){
         ResultVo<T> resultVo=new ResultVo<>();
-        resultVo.setStatus_code(1);
+        resultVo.setStatus_code(SUCCESS);
         resultVo.setData(data);
+        return resultVo;
+    }
+
+    //直接返回错误状态码
+    public static ResultVo fail(){
+        ResultVo resultVo = new ResultVo();
+        resultVo.setStatus_code(ERROR);
         return resultVo;
     }
 
     //直接返回错误状态码和错误信息
     public static ResultVo fail(ErrorMsg errorMsg){
-        ResultVo resultVo=new ResultVo();
-        resultVo.setStatus_code(0);
+        ResultVo resultVo = new ResultVo();
+        resultVo.setStatus_code(ERROR);
         resultVo.setMsg(errorMsg.getMsg());
         return resultVo;
     }
@@ -40,12 +52,18 @@ public class ResultVo<T> {
     //返回错误状态码和错误信息的同时返回错误对象
     public static <T>ResultVo fail(ErrorMsg errorMsg,T data){
         ResultVo<T> resultVo=new ResultVo<>();
-        resultVo.setStatus_code(0);
+        resultVo.setStatus_code(ERROR);
         resultVo.setMsg(errorMsg.getMsg());
         resultVo.setData(data);
         return resultVo;
     }
 
+    //账号不存在
+    public static ResultVo accountNotExist(){
+        ResultVo resultVo = new ResultVo();
+        resultVo.setStatus_code(ACCOUNTNOTEXIST);
+        return resultVo;
+    }
 
     public Integer getStatus_code() {
         return status_code;

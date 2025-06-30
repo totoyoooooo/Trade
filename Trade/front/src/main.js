@@ -7,20 +7,26 @@ import 'element-ui/lib/theme-chalk/index.css';
 import 'babel-polyfill';
 
 import api from './api/index.js';
+import { webSocket } from '@/api';
+import bus from './components/common/bus.js'
+Vue.prototype.$bus = bus 
+// 引入webSocket
 Vue.prototype.$api = api;
+Vue.prototype.$webSocket = webSocket; // 挂载到全局
 
 let globalData={
     userInfo:{
         nickname:''
-    }
+    },
 };
+
 let sta={
     isLogin:false,
     adminName:''
 };
 Vue.prototype.$sta = sta;
 
-Vue.prototype.$globalData=globalData;
+Vue.prototype.$globalData = globalData;
 
 Vue.config.productionTip = false;
 
@@ -30,31 +36,27 @@ Vue.use(ElementUI, {
 
 
 router.beforeEach((to, from, next) => {
-    document.title = `${to.meta.title}`;
-    // console.log(to.path,'userInfo:',Vue.prototype.$globalData.userInfo);
-    const nickname = Vue.prototype.$globalData.userInfo.nickname;
-    if (!nickname
-        &&(to.path === '/me'
-        || to.path === '/message'
-        || to.path === '/release'
-        || to.path === '/order')) {
-        api.getUserInfo().then(res=>{
-           console.log('getUserInfo:',res);
-           if(res.status_code!==1){
-               next('/login');
-           }else {
-               res.data.signInTime=res.data.signInTime.substring(0,10);
-               Vue.prototype.$globalData.userInfo=res.data;
-               next();
-           }
-        }).catch(e=>{
+    // 需要登录的页面路径
+    const needLoginPaths = ['/me', '/release', '/message', '/order', '/chat'];
+    // 判断是否需要登录
+    if (needLoginPaths.includes(to.path)) {
+        // 检查 cookie 是否有 shUserId
+        function getCookie(name) {
+            const value = "; " + document.cookie;
+            const parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return "";
+        }
+        const userId = getCookie('shUserId');
+        if (!userId) {
             next('/login');
-        });
-
-    }else{
-        next();
+            return;
+        }
     }
+    next();
 });
+
+window.Vue = Vue;
 
 new Vue({
     router,

@@ -136,7 +136,7 @@
                     id: this.onlineGoods[i].id,
                     status:2
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.getOnlineGoods();
                     }else {
                         this.$message.error(res.msg)
@@ -150,7 +150,7 @@
                     id: this.OfflineGoods[i].id,
                     status:0
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.getOfflineGoods();
                     }else {
                         this.$message.error(res.msg)
@@ -166,7 +166,7 @@
                     page: this.nowPage,
                     nums:8
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.onlineGoods = res.data.list;
                         this.total = res.data.count;
                     }else {
@@ -182,7 +182,7 @@
                     page: this.nowPage,
                     nums:8
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.OfflineGoods = res.data.list;
                         this.total = res.data.count;
                     }else {

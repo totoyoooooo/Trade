@@ -93,7 +93,7 @@
                     page: this.nowPage,
                     nums:8
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.Order = res.data.list;
                         this.total = res.data.count;
                     }else {
@@ -108,7 +108,7 @@
                 this.$api.deleteOrder({
                     id:this.Order[index].id
                 }).then(res=>{
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.getOrder();
                     }else {
                         this.$message.error(res.msg)

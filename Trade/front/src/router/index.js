@@ -74,6 +74,16 @@ export default new Router({
             meta: { title: '后台管理' }
         },
         {
+            path: '/chat',
+            component: () => import('../components/page/chat.vue'),
+            meta: { title: '聊天 | 二手物品交易平台' }
+        },
+        {
+            path: '/user',
+            component: () => import('../components/page/user.vue'),
+            meta: { title: '用户界面 | 二手物品交易平台' }
+        },
+        {
             path: '*',
             redirect: '/'
         }

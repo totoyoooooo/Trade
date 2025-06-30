@@ -25,6 +25,7 @@ public class MessageController {
                                 @RequestBody MessageModel messageModel){
         messageModel.setUserId(Long.valueOf(shUserId));
         messageModel.setCreateTime(new Date());
+        if(shUserId.equals(String.valueOf(messageModel.getToUser()))) messageModel.setHas_read(1);
         if(messageService.addMessage(messageModel)){
             return ResultVo.success(messageModel);
         }
@@ -57,5 +58,11 @@ public class MessageController {
             return ResultVo.success();
         }
         return ResultVo.fail(ErrorMsg.SYSTEM_ERROR);
+    }
+
+    @PostMapping("clearUnread")
+    public ResultVo clearUnread(@RequestParam Long id){
+        messageService.clearUnread(id);
+        return ResultVo.success();
     }
 }

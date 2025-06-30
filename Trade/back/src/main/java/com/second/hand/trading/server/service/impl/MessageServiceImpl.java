@@ -62,33 +62,10 @@ public class MessageServiceImpl implements MessageService {
      * @return
      */
     public List<MessageModel> getAllMyMessage(Long userId){
-        List<MessageModel> list=messageDao.getMyMessage(userId);
-        if(list.size()>0){
-            List<Long> idList=new ArrayList<>();
-            for(MessageModel i:list){
-                idList.add(i.getUserId());
-            }
-            List<UserModel> userList=userDao.findUserByList(idList);
-            Map<Long,UserModel> map=new HashMap<>();
-            for(UserModel user:userList){
-                map.put(user.getId(),user);
-            }
-            for(MessageModel i:list){
-                i.setFromU(map.get(i.getUserId()));
-            }
-
-            List<Long> idleIdList=new ArrayList<>();
-            for(MessageModel i:list){
-                idleIdList.add(i.getIdleId());
-            }
-            List<IdleItemModel> idleList=idleItemDao.findIdleByList(idleIdList);
-            Map<Long,IdleItemModel> idleMap=new HashMap<>();
-            for(IdleItemModel idle:idleList){
-                idleMap.put(idle.getId(),idle);
-            }
-            for(MessageModel i:list){
-                i.setIdle(idleMap.get(i.getIdleId()));
-            }
+        List<MessageModel> list = messageDao.getMyMessage(userId);
+        for(MessageModel messageModel : list){
+            messageModel.setFromU(userDao.selectByPrimaryKey(messageModel.getUserId()));
+            messageModel.setIdle(idleItemDao.selectByPrimaryKey(messageModel.getIdleId()));
         }
         return list;
     }
@@ -131,5 +108,10 @@ public class MessageServiceImpl implements MessageService {
             }
         }
         return list;
+    }
+
+    @Override
+    public void clearUnread(Long id) {
+        messageDao.clearUnread(id);
     }
 }

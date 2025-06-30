@@ -1,3 +1,4 @@
+import { data } from 'jquery';
 import request from '../utils/request';
 
 const api = {
@@ -27,6 +28,13 @@ const api = {
             url: '/user/info',
             method: 'get',
             params: query
+        });
+    },
+    getUser(query) {
+        return request({
+            url: '/user/getUser',
+            method: 'post',
+            data: query
         });
     },
     updateUserPublicInfo(data) {
@@ -90,6 +98,13 @@ const api = {
             url: '/idle/all',
             method: 'get',
             params: query
+        });
+    },
+    getUserIdleItem(query) {
+        return request({
+            url: '/idle/getUserIdle',
+            method: 'post',
+            data: query
         });
     },
     findIdleTiem(query) {
@@ -302,8 +317,70 @@ const api = {
             method: 'get',
             params: query
         });
+    },
+    getChatList(query) {
+        return request({
+            url: '/chat/getChatList',
+            method: 'post',
+            data: query
+        });
+    },
+    openChat(query) {
+        return request({
+            url: '/chat/openChat',
+            method: 'post',
+            data: query
+        });
+    },
+    sendChatMessage(query) {
+        return request({
+            url: '/chat/sendMessage',
+            method: 'post',
+            data: query
+        });
+    },
+    clearUnread(query) {
+        return request({
+            url: '/chat/clearUnread',
+            method: 'post',
+            data: query
+        });
+    },
+    clearMessageUnread(query) {
+        return request({
+            url: '/message/clearUnread',
+            method: 'post',
+            data: query
+        });
+    },
+};
+
+const webSocket = {
+    ws: null,
+    init(url){
+        this.ws = new WebSocket(url);
+        this.ws.onopen = () => {
+            console.log('WebSocket connection opened');
+        };
+        this.ws.onmessage = (event) => {
+            if (window.Vue && window.Vue.prototype && window.Vue.prototype.$bus) {
+                console.log('WebSocket message received:' + JSON.parse(event.data));
+                if(JSON.parse(event.data).type == "chat"){
+                    window.Vue.prototype.$bus.$emit('new-message', JSON.parse(event.data).content);
+                }else if(JSON.parse(event.data).type == "message"){
+                    window.Vue.prototype.$bus.$emit('new-leave-message', JSON.parse(event.data).content);
+                }
+            }
+        };
+    },
+    sendMessage(data) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(data));
+        } else {
+            console.error('WebSocket is not open');
+        }
     }
 };
 
-
 export default api;
+export { webSocket };

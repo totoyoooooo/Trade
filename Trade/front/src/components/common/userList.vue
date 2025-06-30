@@ -178,7 +178,7 @@
                     nums:8,
                     status:0
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.userData = res.data.list;
                         this.total = res.data.count;
                     }else {
@@ -195,7 +195,7 @@
                     nums:8,
                     status:1
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.badUserData = res.data.list;
                         this.total = res.data.count;
                     }else {
@@ -211,7 +211,7 @@
                     page: this.nowPage,
                     nums:8,
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.userManage = res.data.list;
                         this.total = res.data.count;
                     }else {
@@ -227,7 +227,7 @@
                     id: this.userData[i].id,
                     status:1
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.getUserData();
                     }else {
                         this.$message.error(res.msg)
@@ -241,7 +241,7 @@
                     id: this.badUserData[i].id,
                     status:0
                 }).then(res => {
-                    if(res.status_code==1){
+                    if(res.status_code==200){
                         this.getBadUserData();
                     }else {
                         this.$message.error(res.msg)
@@ -258,7 +258,7 @@
                         accountNumber: this.adminAccount,
                         adminPassword: this.adminPassword,
                     }).then(res => {
-                        if(res.status_code==1){
+                        if(res.status_code==200){
                             this.total = this.total+1;
                             this.nowPage= Math.ceil(this.total/8);
                             console.log(this.nowPage);

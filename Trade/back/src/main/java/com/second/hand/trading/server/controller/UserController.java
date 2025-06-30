@@ -21,7 +21,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-
     /**
      * 注册账号
      * @param userModel
@@ -29,6 +28,9 @@ public class UserController {
      */
     @PostMapping("sign-in")
     public ResultVo signIn(@RequestBody  UserModel userModel) {
+        if(userService.getUserByAccountNumber(userModel.getAccountNumber()) != null){
+            return ResultVo.fail();
+        }
         System.out.println(userModel);
         userModel.setSignInTime(new Timestamp(System.currentTimeMillis()));
         if (userModel.getAvatar() == null || "".equals(userModel.getAvatar())) {
@@ -37,7 +39,7 @@ public class UserController {
         if (userService.userSignIn(userModel)) {
             return ResultVo.success(userModel);
         }
-        return ResultVo.fail(ErrorMsg.REGISTER_ERROR);
+        return ResultVo.fail();
     }
 
     /**
@@ -52,10 +54,13 @@ public class UserController {
     public ResultVo login(@RequestParam("accountNumber") @NotEmpty @NotNull String accountNumber,
                           @RequestParam("userPassword") @NotEmpty @NotNull String userPassword,
                           HttpServletResponse response) {
-        UserModel userModel = userService.userLogin(accountNumber, userPassword);
+        UserModel userModel = userService.getUserByAccountNumber(accountNumber);
         System.out.println("登录：" + userModel);
         if (null == userModel) {
-            return ResultVo.fail(ErrorMsg.EMAIL_LOGIN_ERROR);
+            return ResultVo.accountNotExist();
+        }
+        if(!userService.getPassword(accountNumber).equals(userPassword)){
+            return ResultVo.fail();
         }
         if(userModel.getUserStatus()!=null&&userModel.getUserStatus().equals((byte) 1)){
             return ResultVo.fail(ErrorMsg.ACCOUNT_Ban);
@@ -135,4 +140,16 @@ public class UserController {
         }
         return ResultVo.fail(ErrorMsg.PASSWORD_RESET_ERROR);
     }
+
+    @PostMapping("getUser")
+    public ResultVo getUser(@RequestParam Long id) {
+        System.out.println(id);
+        UserModel userModel = userService.getUser(id);
+        System.out.println(userModel);
+        if (userModel != null) {
+            return ResultVo.success(userModel);
+        }
+        return ResultVo.fail();
+    }
+
 }
