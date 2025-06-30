@@ -8,7 +8,7 @@
           :key="chat.id"
           class="chat-item"
           @click="selectChat(chat)"
-          :class="{ 'active-chat': selectedChat === chat }"
+          :class="{ 'active-chat': selectedChat && selectedChat.id === chat.id }"
         >
         <el-badge :value="chat.unread" :hidden="!chat.unread" class="unread-badge">
           <el-avatar :src="chat.avatar" size="large" />
@@ -274,6 +274,7 @@ export default {
 
 .active-chat {
   background-color: #d0d0d0;
+  border-left: 4px solid #409EFF;
 }
 
 .avatar {
@@ -420,7 +421,7 @@ export default {
 .unread-badge {
   margin-right: 8px;
 }
-/* scoped 下强制覆盖 el-input 的 textarea 禁止缩放 */
+
 ::v-deep(.input textarea) {
   resize: none !important;
 }
