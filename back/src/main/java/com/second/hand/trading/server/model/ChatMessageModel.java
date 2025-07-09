@@ -22,4 +22,6 @@ public class ChatMessageModel {
     private String avatar;
 
     private int has_read;
+
+    private int has_revoke;
 }

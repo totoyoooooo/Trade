@@ -12,4 +12,5 @@ public interface ChatMessageService {
 
     void readChatMessage(String chatId,Long senderId);
 
+    void revokeChatMessage(Long id);
 }

@@ -51,6 +51,13 @@ const api = {
             params: query
         });
     },
+    updateTrade(query) {
+        return request({
+            url: '/user/order',
+            method: 'post',
+            data: query
+        });
+    },
     addAddress(data) {
         return request({
             url: '/address/add',
@@ -346,6 +353,13 @@ const api = {
             data: query
         });
     },
+    revokeMessage(query) {
+        return request({
+            url: '/chat/revokeMessage',
+            method: 'post',
+            data: query
+        });
+    },
     clearMessageUnread(query) {
         return request({
             url: '/message/clearUnread',
@@ -353,6 +367,55 @@ const api = {
             data: query
         });
     },
+    createTag(query) {
+        return request({
+            url: '/tag/createTag',
+            method: 'post',
+            data: query
+        });
+    },
+    getAkinTag(query) {
+        return request({
+            url: '/tag/getAkinTag',
+            method: 'post',
+            data: query
+        });
+    },
+    addShield(data) {
+        return request({
+            url: '/shield/add',
+            method: 'post',
+            data: data
+        });
+    },
+    getMyShield(query) {
+        return request({
+            url: '/shield/my',
+            method: 'get',
+            params: query
+        });
+    },
+    deleteShield(query) {
+        return request({
+            url: '/shield/delete',
+            method: 'get',
+            params: query
+        });
+    },
+    checkShield(query) {
+        return request({
+            url: '/shield/check',
+            method: 'get',
+            params: query
+        });
+    },
+    decreaseRecommendation(query) {
+        return request({
+            url: '/shield/decrease',
+            method: 'get',
+            params: query
+        });
+    }
 };
 
 const webSocket = {
@@ -369,6 +432,8 @@ const webSocket = {
                     window.Vue.prototype.$bus.$emit('new-message', JSON.parse(event.data).content);
                 }else if(JSON.parse(event.data).type == "message"){
                     window.Vue.prototype.$bus.$emit('new-leave-message', JSON.parse(event.data).content);
+                }else if(JSON.parse(event.data).type == "revoke"){
+                    window.Vue.prototype.$bus.$emit('revoke-message', JSON.parse(event.data).content);
                 }
             }
         };

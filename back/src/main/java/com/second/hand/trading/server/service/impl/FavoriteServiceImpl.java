@@ -61,20 +61,24 @@ public class FavoriteServiceImpl implements FavoriteService {
      */
     public List<FavoriteModel> getAllFavorite(Long userId){
         List<FavoriteModel> list=favoriteDao.getMyFavorite(userId);
-        if(list.size()>0){
-            List<Long> idleIdList=new ArrayList<>();
-            for(FavoriteModel i:list){
-                idleIdList.add(i.getIdleId());
-            }
-            List<IdleItemModel> idleItemModelList=idleItemDao.findIdleByList(idleIdList);
-            Map<Long,IdleItemModel> map=new HashMap<>();
-            for(IdleItemModel idle:idleItemModelList){
-                map.put(idle.getId(),idle);
-            }
-            for(FavoriteModel i:list){
-                i.setIdleItem(map.get(i.getIdleId()));
-            }
+        for(FavoriteModel favoriteModel:list){
+            favoriteModel.setIdleItem(idleItemDao.selectByPrimaryKey(favoriteModel.getIdleId()));
         }
         return list;
     }
+
+    /**
+     * 根据物品ID获取该物品被收藏量
+     * @param idleId
+     * @return
+     */
+    public List<FavoriteModel> getFavoriteByIdleItem(Long idleId){
+        return favoriteDao.getFavoriteByIdleItem(idleId);
+    }
+
+    @Override
+    public FavoriteModel getFavoriteById(Long id) {
+        return favoriteDao.selectByPrimaryKey(id);
+    }
+
 }

@@ -92,6 +92,7 @@
         methods: {
             findIdleTiem(page, findValue) {
                 this.$api.findIdleTiem({
+                    userId: this.getCookie('shUserId'),
                     page: page,
                     nums: 8,
                     findValue: findValue
@@ -108,6 +109,15 @@
                 }).catch(e => {
                     console.log(e)
                 })
+            },
+            getCookie(cname) {
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i].trim();
+                    if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+                }
+                return "";
             },
             handleClick(tab, event) {
                 console.log(tab, event);

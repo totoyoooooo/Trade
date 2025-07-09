@@ -5,10 +5,47 @@
             <div class="release-idle-container">
                 <div class="release-idle-container-title">物品发布</div>
                 <div class="release-idle-container-form">
-                    <el-input placeholder="请输入二手物品名称" v-model="idleItemInfo.idleName"
+                    <el-input placeholder="请输入物品名称" v-model="idleItemInfo.idleName"
                               maxlength="30"
                               show-word-limit>
                     </el-input>
+                    <el-popover
+                        v-model="showTagDropdown"
+                        placement="bottom-start"
+                        trigger="manual"
+                        :width="300"
+                        :visible-arrow="false"
+                        :append-to-body="false"
+                        >
+                        <div v-if="tagSuggestions.length">
+                            <div
+                            v-for="(item, idx) in tagSuggestions"
+                            :key="item.text"
+                            :class="['tag-suggestion-item', {active: idx === highlightedIdx}]"
+                            @mousedown.prevent="selectTagSuggestion(item)"
+                            style="display:flex;justify-content:space-between;cursor:pointer;padding:4px 8px;"
+                            @mouseenter="highlightedIdx = idx">
+                                <span>{{ item.text }}</span>
+                                <span style="color:#888;font-size:12px;">被引用{{ item.use_count }}次</span>
+                            </div>
+                        </div>
+                        <div v-else style="color:#aaa;padding:4px 8px;">暂无建议</div>
+                        <el-input
+                        class="release-idle-tag-text"
+                        slot="reference"
+                        ref="tagInput"
+                        v-model="idleItemInfo.idleTag"
+                        placeholder="请输入物品标签(#开头)"
+                        @input="onTagInputChange"
+                        @focus="onTagInputChange"
+                        @blur="onTagInputBlur"
+                        @keyup.native="onCursorMove"
+                        @mouseup.native="onCursorMove"
+                        @keydown.down.native="highlightNext"
+                        @keydown.up.native="highlightPrev"
+                        @keydown.enter.native="selectHighlighted"
+                        ></el-input>
+                    </el-popover>
                     <el-input
                             class="release-idle-detiles-text"
                             type="textarea"
@@ -88,6 +125,7 @@
     import AppBody from '../common/AppPageBody.vue'
     import AppFoot from '../common/AppFoot.vue'
     import options from '../common/country-data.js'
+import { isArray } from 'jquery';
 
     export default {
         name: "release",
@@ -120,8 +158,12 @@
                     label: '其他'
                 }],
                 imgList:[],
+                tagSuggestions: [],
+    showTagDropdown: false,
+    highlightedIdx: 0,
                 idleItemInfo:{
                     idleName:'',
+                    idleTag:'',
                     idleDetails:'',
                     pictureList:'',
                     idlePrice:0,
@@ -161,13 +203,31 @@
                 this.imgList.push(response.data);
             },
             releaseButton(){
+                if(this.idleItemInfo.idleTag){
+                    let tagStr = this.idleItemInfo.idleTag;
+                    let tags = tagStr.match(/#[^\s#]+/g);
+                    if (tags) {
+                        tags = Array.from(new Set(tags));
+                        this.idleItemInfo.idleTag = tags.join('');
+                    } else {
+                        this.idleItemInfo.idleTag = '';
+                    }
+                }
                 this.idleItemInfo.pictureList=JSON.stringify(this.imgList);
                 console.log(this.idleItemInfo);
                 if(this.idleItemInfo.idleName&&
                     this.idleItemInfo.idleDetails&&
                     this.idleItemInfo.idlePlace&&
                     this.idleItemInfo.idleLabel&&
-                    this.idleItemInfo.idlePrice){
+                    this.idleItemInfo.idlePrice&&
+                    this.idleItemInfo.idleTag){
+                    this.$api.createTag("text=" + this.idleItemInfo.idleTag).then(res=>{
+                        if (res.status_code === 200) {
+                    
+                        }
+                    }).catch(e=>{
+                        
+                    });
                     this.$api.addIdleItem(this.idleItemInfo).then(res=>{
                         if (res.status_code === 200) {
                             this.$message({
@@ -199,6 +259,130 @@
                 }
                 return "";
             },
+            onCursorMove() {
+                this.updateTagSuggestions();
+            },
+            getCurrentTagInfo() {
+                const input = this.idleItemInfo.idleTag || '';
+                const inputEl = this.$refs.tagInput.$el.querySelector('input');
+                if (!inputEl) return null;
+                const cursorPos = inputEl.selectionStart;
+
+                // 找到所有#的位置
+                let tagPositions = [];
+                for (let i = 0; i < input.length; i++) {
+                    if (input[i] === '#') tagPositions.push(i);
+                }
+                if (tagPositions.length === 0) return null;
+
+                // 找到光标所在的标签区间
+                let start = -1, end = input.length;
+                for (let i = 0; i < tagPositions.length; i++) {
+                    if (tagPositions[i] < cursorPos) {
+                        start = tagPositions[i];
+                    }
+                    if (tagPositions[i] > cursorPos) {
+                        end = tagPositions[i];
+                        break;
+                    }
+                }
+                // 如果光标正好在某个#前，也归到前一个标签
+                if (tagPositions.includes(cursorPos)) {
+                    const idx = tagPositions.indexOf(cursorPos);
+                    if (idx > 0) {
+                        start = tagPositions[idx - 1];
+                        end = tagPositions[idx];
+                    }
+                }
+                // 特殊处理：如果光标正好在#上，归到前一个标签
+                if (input[cursorPos - 1] === '#') {
+                    start = cursorPos - 1;
+                 // end 需要重新找
+                    end = input.indexOf('#', start + 1);
+                    if (end === -1) end = input.length;
+                }
+                if (start === -1) return null;
+                const tagText = input.substring(start, end);
+                return { tagText, start, end };
+            },
+            onTagInputBlur() {
+                this.showTagDropdown = false;
+            },
+            async updateTagSuggestions() {
+                const info = this.getCurrentTagInfo();
+                if (!info || !info.tagText || info.tagText === '#') {
+                    this.tagSuggestions = [];
+                    this.showTagDropdown = false;
+                    return;
+                }
+                const res = await this.$api.getAkinTag("text=" + info.tagText).catch(() => ({data: []}));
+                this.tagSuggestions = Array.isArray(res.data) ? res.data : [];
+                this.showTagDropdown = this.tagSuggestions.length > 0;
+                this.highlightedIdx = 0;
+            },
+            // fetch-suggestions
+            queryTagSuggestions(queryString, cb) {
+                this.$nextTick(() => {
+                    const info = this.getCurrentTagInfo();
+                    if (!info || !info.tagText || info.tagText === '#') {
+                        cb([]);
+                        return;
+                    }
+                    this.$api.getAkinTag("text=" + info.tagText).then(res => {
+                        if (res.status_code === 200 && Array.isArray(res.data)) {
+                            cb(res.data); // 直接返回对象数组
+                        } else {
+                            cb([]);
+                        }
+                    }).catch(() => {
+                        cb([]);
+                    });
+                });
+            },
+            selectTagSuggestion(item) {
+                const input = this.idleItemInfo.idleTag || '';
+                const inputEl = this.$refs.tagInput.$el.querySelector('input');
+                const info = this.getCurrentTagInfo();
+                if (!info) return;
+                this.idleItemInfo.idleTag = input.substring(0, info.start) + item.text + input.substring(info.end);
+                this.$nextTick(() => {
+                    if (inputEl) {
+                        inputEl.selectionStart = inputEl.selectionEnd = info.start + item.text.length;
+                        inputEl.focus();
+                    }
+                });
+            },
+            async onTagInputChange() {
+                await this.updateTagSuggestions();
+            },
+            selectTagSuggestion(item) {
+                const input = this.idleItemInfo.idleTag || '';
+                const info = this.getCurrentTagInfo();
+                if (!info) return;
+                this.idleItemInfo.idleTag = input.substring(0, info.start) + item.text + input.substring(info.end);
+                this.showTagDropdown = false;
+                this.$nextTick(() => {
+                const inputEl = this.$refs.tagInput.$el.querySelector('input');
+                if (inputEl) {
+                    inputEl.selectionStart = inputEl.selectionEnd = info.start + item.text.length;
+                    inputEl.focus();
+                }
+                });
+            },
+            // 键盘上下选择
+            highlightNext() {
+                if (!this.showTagDropdown) return;
+                this.highlightedIdx = (this.highlightedIdx + 1) % this.tagSuggestions.length;
+            },
+            highlightPrev() {
+                if (!this.showTagDropdown) return;
+                this.highlightedIdx = (this.highlightedIdx - 1 + this.tagSuggestions.length) % this.tagSuggestions.length;
+            },
+            selectHighlighted() {
+                if (this.showTagDropdown && this.tagSuggestions[this.highlightedIdx]) {
+                this.selectTagSuggestion(this.tagSuggestions[this.highlightedIdx]);
+                }
+            },
         }
     }
 </script>
@@ -218,6 +402,10 @@
 
     .release-idle-container-form {
         padding: 0 180px;
+    }
+
+    .release-idle-tag-text {
+        margin-top: 20px;
     }
 
     .release-idle-detiles-text {
@@ -251,5 +439,8 @@
         flex-direction: column;
         align-items: center;
         height: 100px;
+    }
+    .tag-suggestion-item.active {
+        background: #f5f7fa;
     }
 </style>

@@ -34,4 +34,8 @@ public interface IdleItemDao {
     int updateByPrimaryKey(IdleItemModel record);
 
     List<IdleItemModel> findIdleByList(List<Long> idList);
+
+    List<IdleItemModel> getIdleItemList();
+
+    int addSkimCount(Long id);
 }

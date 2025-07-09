@@ -17,4 +17,5 @@ public interface ChatMessageDao {
 
     void readChatMessage(@Param("chat_id") String chatId, @Param("sender_id") Long senderId);
 
+    void revokeChatMessage(@Param("id") Long id);
 }

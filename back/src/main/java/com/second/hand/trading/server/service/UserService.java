@@ -52,4 +52,23 @@ public interface UserService {
     boolean updatePassword(String newPassword, String oldPassword,Long id);
 
     PageVo<UserModel> getUserByStatus(int status, int page , int nums);
+
+    int setCollectTag(Long id,String collectTag);
+
+    int setSkimTag(Long id,String skimTag);
+
+    int setIssueTag(Long id,String issueTag);
+
+    int setShieldTag(Long id,String shieldTag);
+
+    int setDecreaseTag(Long id,String decreaseTag);
+
+    Long getTradeCount(Long id);
+
+    int getApplauseRate(Long id);
+
+    int setTradeCount(Long id,Long tradeCount);
+
+    int setApplauseRate(Long id,int applauseRate);
+
 }

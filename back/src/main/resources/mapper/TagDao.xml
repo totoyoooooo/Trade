@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.second.hand.trading.server.dao.TagDao">
+    <insert id="createTag">
+        insert into sh_tag (text)
+        values (#{text})
+    </insert>
+    <delete id="deleteTag">
+        delete
+        from sh_tag
+        where text = #{text}
+    </delete>
+    <update id="setTagCount">
+        update sh_tag set use_count = #{use_count}
+        where text = #{text}
+    </update>
+    <select id="getAllTag" resultType="TagModel">
+        select *
+        from sh_tag
+    </select>
+    <select id="getAkinTag" resultType="TagModel">
+        select *
+        from sh_tag
+        where text like #{text}
+    </select>
+    <select id="getTag" resultType="TagModel">
+        select *
+        from sh_tag
+        where text = #{text}
+    </select>
+</mapper>

@@ -35,7 +35,7 @@ public interface IdleItemService {
      * @param nums
      * @return
      */
-    PageVo<IdleItemModel> findIdleItem(String findValue, int page, int nums);
+    PageVo<IdleItemModel> findIdleItem(Long userId,String findValue, int page, int nums);
 
     /**
      * 按分类获取闲置，分页器
@@ -44,7 +44,7 @@ public interface IdleItemService {
      * @param nums
      * @return
      */
-    PageVo<IdleItemModel> findIdleItemByLable(int idleLabel, int page, int nums);
+    PageVo<IdleItemModel> findIdleItemByLable(Long userId,int idleLabel, int page, int nums);
 
     /**
      * 更新闲置的状态信息
@@ -53,5 +53,9 @@ public interface IdleItemService {
      */
     boolean updateIdleItem(IdleItemModel idleItemModel);
 
-    PageVo<IdleItemModel> adminGetIdleList(int status, int page, int nums) ;
+    PageVo<IdleItemModel> adminGetIdleList(int status, int page, int nums);
+
+    List<IdleItemModel> getIdleItemList(Long userId,List<IdleItemModel> list);
+
+    int addSkimCount(Long id);
 }

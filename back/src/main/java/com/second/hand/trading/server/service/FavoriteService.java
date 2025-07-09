@@ -34,4 +34,13 @@ public interface FavoriteService {
      * @return
      */
     List<FavoriteModel> getAllFavorite(Long userId);
+
+    /**
+     *  根据物品ID获取所有收藏物品
+     * @param idleId
+     * @return
+     */
+    List<FavoriteModel> getFavoriteByIdleItem(Long idleId);
+
+    FavoriteModel getFavoriteById(Long id);
 }

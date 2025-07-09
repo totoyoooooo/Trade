@@ -29,5 +29,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         chatMessageDao.readChatMessage(chatId,senderId);
     }
 
+    @Override
+    public void revokeChatMessage(Long id) {
+        chatMessageDao.revokeChatMessage(id);
+    }
+
 
 }

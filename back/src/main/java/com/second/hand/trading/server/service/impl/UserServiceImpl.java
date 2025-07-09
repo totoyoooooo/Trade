@@ -86,4 +86,49 @@ public class UserServiceImpl implements UserService {
         return new PageVo<>(list,count);
     }
 
+    @Override
+    public int setCollectTag(Long id,String collectTag) {
+        return userDao.setCollectTag(id,collectTag);
+    }
+
+    @Override
+    public int setSkimTag(Long id, String skimTag) {
+        return userDao.setSkimTag(id,skimTag);
+    }
+
+    @Override
+    public int setIssueTag(Long id, String issueTag) {
+        return userDao.setIssueTag(id,issueTag);
+    }
+
+    @Override
+    public int setShieldTag(Long id, String shieldTag) {
+        return userDao.setShieldTag(id,shieldTag);
+    }
+
+    @Override
+    public int setDecreaseTag(Long id, String decreaseTag) {
+        return userDao.setDecreaseTag(id,decreaseTag);
+    }
+
+    @Override
+    public Long getTradeCount(Long id) {
+        return userDao.getTradeCount(id);
+    }
+
+    @Override
+    public int getApplauseRate(Long id) {
+        return userDao.getApplauseRate(id);
+    }
+
+    @Override
+    public int setTradeCount(Long id, Long tradeCount) {
+        return userDao.setTradeCount(id,tradeCount);
+    }
+
+    @Override
+    public int setApplauseRate(Long id, int applauseRate) {
+        return userDao.setApplauseRate(id,applauseRate);
+    }
+
 }

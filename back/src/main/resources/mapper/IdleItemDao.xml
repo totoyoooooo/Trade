@@ -12,13 +12,15 @@
     <result column="release_time" jdbcType="TIMESTAMP" property="releaseTime" />
     <result column="idle_status" jdbcType="TINYINT" property="idleStatus" />
     <result column="user_id" jdbcType="BIGINT" property="userId" />
+    <result column="tag" jdbcType="VARCHAR" property="idleTag"/>
+    <result column="skim_count" jdbcType="BIGINT" property="skimCount"/>
   </resultMap>
   <sql id="Base_Column_List">
-    id, idle_name, idle_details, picture_list, idle_price, idle_place, idle_label, release_time, 
-    idle_status, user_id
+    id, idle_name, idle_details, picture_list, idle_price, idle_place, idle_label, release_time,
+    idle_status, user_id, tag, skim_count
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select 
+    select
     <include refid="Base_Column_List" />
     from sh_idle_item
     where id = #{id,jdbcType=BIGINT}
@@ -45,7 +47,7 @@
     select
     <include refid="Base_Column_List" />
     from sh_idle_item
-    where (idle_name LIKE "%"#{findValue}"%" or idle_details LIKE "%"#{findValue}"%") and idle_status = 1 order by id desc limit #{begin}, #{nums}
+    where (idle_name LIKE "%"#{findValue}"%" or idle_details LIKE "%"#{findValue}"%" or tag LIKE "%"#{findValue}"%") and idle_status = 1 order by id desc limit #{begin}, #{nums}
   </select>
   <select id="findIdleItemByLable" resultMap="BaseResultMap">
     select
@@ -73,14 +75,14 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.second.hand.trading.server.model.IdleItemModel" useGeneratedKeys="true">
-    insert into sh_idle_item (idle_name, idle_details, picture_list, 
-      idle_price, idle_place, idle_label, 
-      release_time, idle_status, user_id
-      )
-    values (#{idleName,jdbcType=VARCHAR}, #{idleDetails,jdbcType=VARCHAR}, #{pictureList,jdbcType=VARCHAR}, 
-      #{idlePrice,jdbcType=DECIMAL}, #{idlePlace,jdbcType=VARCHAR}, #{idleLabel,jdbcType=INTEGER}, 
-      #{releaseTime,jdbcType=TIMESTAMP}, #{idleStatus,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}
-      )
+    insert into sh_idle_item (idle_name, idle_details, picture_list,
+                              idle_price, idle_place, idle_label,
+                              release_time, idle_status, user_id, tag
+    )
+    values (#{idleName,jdbcType=VARCHAR}, #{idleDetails,jdbcType=VARCHAR}, #{pictureList,jdbcType=VARCHAR},
+            #{idlePrice,jdbcType=DECIMAL}, #{idlePlace,jdbcType=VARCHAR}, #{idleLabel,jdbcType=INTEGER},
+            #{releaseTime,jdbcType=TIMESTAMP}, #{idleStatus,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, #{idleTag,jdbcType=VARCHAR}
+           )
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.second.hand.trading.server.model.IdleItemModel" useGeneratedKeys="true">
     insert into sh_idle_item
@@ -176,14 +178,22 @@
   <update id="updateByPrimaryKey" parameterType="com.second.hand.trading.server.model.IdleItemModel">
     update sh_idle_item
     set idle_name = #{idleName,jdbcType=VARCHAR},
-      idle_details = #{idleDetails,jdbcType=VARCHAR},
-      picture_list = #{pictureList,jdbcType=VARCHAR},
-      idle_price = #{idlePrice,jdbcType=DECIMAL},
-      idle_place = #{idlePlace,jdbcType=VARCHAR},
-      idle_label = #{idleLabel,jdbcType=INTEGER},
-      release_time = #{releaseTime,jdbcType=TIMESTAMP},
-      idle_status = #{idleStatus,jdbcType=TINYINT},
-      user_id = #{userId,jdbcType=BIGINT}
+        idle_details = #{idleDetails,jdbcType=VARCHAR},
+        picture_list = #{pictureList,jdbcType=VARCHAR},
+        idle_price = #{idlePrice,jdbcType=DECIMAL},
+        idle_place = #{idlePlace,jdbcType=VARCHAR},
+        idle_label = #{idleLabel,jdbcType=INTEGER},
+        release_time = #{releaseTime,jdbcType=TIMESTAMP},
+        idle_status = #{idleStatus,jdbcType=TINYINT},
+        user_id = #{userId,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="getIdleItemList" resultMap="BaseResultMap">
+    select *
+    from sh_idle_item
+  </select>
+  <update id="addSkimCount">
+    update sh_idle_item set skim_count = skim_count + 1
+    where id = #{id}
   </update>
 </mapper>

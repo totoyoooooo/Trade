@@ -22,4 +22,6 @@ public interface FavoriteDao {
     int updateByPrimaryKeySelective(FavoriteModel record);
 
     int updateByPrimaryKey(FavoriteModel record);
+
+    List<FavoriteModel> getFavoriteByIdleItem(Long idleId);
 }

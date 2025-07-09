@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.second.hand.trading.server.dao.ShieldDao">
+    <resultMap id="BaseResultMap" type="com.second.hand.trading.server.model.ShieldModel">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="user_id" jdbcType="BIGINT" property="userId" />
+        <result column="idle_id" jdbcType="BIGINT" property="idleId" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, create_time, user_id, idle_id
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sh_shield
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="getMyShield" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from sh_shield
+        where user_id = #{userId,jdbcType=BIGINT} order by id desc
+    </select>
+    <select id="checkShield" resultType="Integer">
+        select id
+        from sh_shield
+        where user_id = #{userId,jdbcType=BIGINT} and idle_id = #{idleId,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from sh_shield
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.second.hand.trading.server.model.ShieldModel" useGeneratedKeys="true">
+        insert into sh_shield (create_time, user_id, idle_id
+        )
+        values (#{createTime,jdbcType=TIMESTAMP}, #{userId,jdbcType=BIGINT}, #{idleId,jdbcType=BIGINT}
+               )
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.second.hand.trading.server.model.ShieldModel">
+        update sh_shield
+        set create_time = #{createTime,jdbcType=TIMESTAMP},
+            user_id = #{userId,jdbcType=BIGINT},
+            idle_id = #{idleId,jdbcType=BIGINT}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="getShieldByIdleItem" resultMap="BaseResultMap">
+        select *
+        from sh_shield
+        where idle_id = #{idleId}
+    </select>
+</mapper>

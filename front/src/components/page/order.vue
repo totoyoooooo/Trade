@@ -68,6 +68,20 @@
                     <el-button v-if="userId==orderInfo.idleItem.userId&&orderInfo.orderStatus===1" type="primary" plain @click="changeOrderStatus(2,orderInfo)">发货</el-button>
                     <el-button v-if="userId==orderInfo.userId&&orderInfo.orderStatus===2" type="primary" plain @click="changeOrderStatus(3,orderInfo)">确认收货</el-button>
                 </div>
+                <el-dialog
+                    title="订单评分"
+                    :visible.sync="showRateDialog"
+                    width="350px"
+                    :close-on-click-modal="false"
+                    :show-close="false"
+                >
+                    <div style="text-align:center;">
+                        <el-rate v-model="rateValue" :max="5" show-text></el-rate>
+                        <div style="margin-top: 20px;">
+                            <el-button type="primary" :loading="rateSubmitting" @click="submitRate">提交评分</el-button>
+                        </div>
+                    </div>
+                </el-dialog>
             </div>
             <app-foot></app-foot>
         </app-body>
@@ -88,6 +102,9 @@
         },
         data() {
             return {
+                showRateDialog: false,
+                rateValue: 0,
+                rateSubmitting: false,
                 addressDialogVisible:false,
                 addressData: [],
                 orderStatus: ['待付款', '待发货', '待收货', '已完成', '已取消'],
@@ -263,7 +280,21 @@
                         }).catch(() => {
                         });
                     }
-                } else {
+                } else if (orderStatus === 3) {
+                    this.$api.updateOrder({
+                        id: orderInfo.id,
+                        orderStatus: orderStatus,
+                    }).then(res => {
+                        if (res.status_code === 200) {
+                            this.$message({
+                                message: '操作成功！',
+                                type: 'success'
+                            });
+                            this.orderInfo.orderStatus = orderStatus;
+                            this.showRateDialog = true;
+                        }
+                    })
+                }  else{
                     this.$api.updateOrder({
                         id: orderInfo.id,
                         orderStatus: orderStatus,
@@ -277,6 +308,25 @@
                         }
                     })
                 }
+            },
+            submitRate() {
+                if (!this.rateValue) {
+                    this.$message.warning('请先选择评分');
+                    return;
+                }
+                this.rateSubmitting = true;
+                this.$api.updateTrade("id=" + this.getCookie("shUserId") + "&score=" + this.rateValue).then(res => {
+                    if (res.status_code === 200) {
+                        this.$message.success('评分成功，感谢您的反馈！');
+                        this.showRateDialog = false;
+                    } else {
+                        this.$message.error(res.msg || '评分失败');
+                    }
+                }).catch(() => {
+                    this.$message.error('评分失败');
+                }).finally(() => {
+                    this.rateSubmitting = false;
+                });
             },
         }
 

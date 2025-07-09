@@ -101,7 +101,7 @@ public class UserController {
     @GetMapping("info")
     public ResultVo getOneUser(@CookieValue("shUserId") @NotNull(message = "登录异常 请重新登录")
                                @NotEmpty(message = "登录异常 请重新登录")
-                                       String id) {
+                               String id) {
         return ResultVo.success(userService.getUser(Long.valueOf(id)));
     }
 
@@ -113,8 +113,8 @@ public class UserController {
      */
     @PostMapping("/info")
     public ResultVo updateUserPublicInfo(@CookieValue("shUserId") @NotNull(message = "登录异常 请重新登录")
-                                     @NotEmpty(message = "登录异常 请重新登录")
-                                             String id, @RequestBody  UserModel userModel) {
+                                         @NotEmpty(message = "登录异常 请重新登录")
+                                         String id, @RequestBody  UserModel userModel) {
         userModel.setId(Long.valueOf(id));
         if (userService.updateUserInfo(userModel)) {
             return ResultVo.success();
@@ -141,7 +141,7 @@ public class UserController {
         return ResultVo.fail(ErrorMsg.PASSWORD_RESET_ERROR);
     }
 
-    @PostMapping("getUser")
+    @PostMapping("/getUser")
     public ResultVo getUser(@RequestParam Long id) {
         System.out.println(id);
         UserModel userModel = userService.getUser(id);
@@ -150,6 +150,18 @@ public class UserController {
             return ResultVo.success(userModel);
         }
         return ResultVo.fail();
+    }
+
+    @PostMapping("/order")
+    public ResultVo updateTradeCountAndApplauseRate(@RequestParam Long id, @RequestParam int score) {
+        Long tradeCount = userService.getTradeCount(id);
+        int applauseRate = userService.getApplauseRate(id);
+        Long goodCount = (long) Math.round((float) (tradeCount * applauseRate) / 100);
+        tradeCount++;
+        if(score == 5) goodCount++;
+        userService.setTradeCount(id, tradeCount);
+        userService.setApplauseRate(id, Math.toIntExact(100 * (goodCount / tradeCount)));
+        return ResultVo.success();
     }
 
 }

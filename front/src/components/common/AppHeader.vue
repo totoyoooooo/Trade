@@ -52,11 +52,13 @@
             this.getUnreadTotal();
             this.getUnreadMessageTotal();
             this.$bus.$on('new-message', this.getUnreadTotal);
+            this.$bus.$on('revoke-message', this.getUnreadTotal);
             this.$bus.$on('new-leave-message', this.getUnreadMessageTotal);
         },
         beforeDestroy() {
             // console.log("header beforeDestroy");
             this.$bus.$off('new-message', this.getUnreadTotal);
+            this.$bus.$off('revoke-message', this.getUnreadTotal);
             this.$bus.$off('new-leave-message', this.getUnreadMessageTotal);
         },
         created(){

@@ -1,12 +1,13 @@
 package com.second.hand.trading.server.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * sh_user
- * @author myl
- */
+@Getter
+@Setter
 public class UserModel implements Serializable {
     /**
      * 自增主键
@@ -42,61 +43,34 @@ public class UserModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
+    /**
+     * 收藏标签
+     */
+    private String collectTag;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    /**
+     * 浏览标签
+     */
+    private String skimTag;
 
-    public String getAccountNumber() {
-        return accountNumber;
-    }
+    /**
+     * 发布标签
+     */
+    private String issueTag;
 
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
+    /**
+     * 屏蔽标签
+     */
+    private String shieldTag;
 
-    public String getUserPassword() {
-        return userPassword;
-    }
+    /**
+     * 减少推送标签
+     */
+    private String decreaseTag;
 
-    public void setUserPassword(String userPassword) {
-        this.userPassword = userPassword;
-    }
+    private Long tradeCount;
 
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public Date getSignInTime() {
-        return signInTime;
-    }
-
-    public void setSignInTime(Date signInTime) {
-        this.signInTime = signInTime;
-    }
-
-    public Byte getUserStatus() {
-        return userStatus;
-    }
-
-    public void setUserStatus(Byte userStatus) {
-        this.userStatus = userStatus;
-    }
+    private int applauseRate;
 
     @Override
     public boolean equals(Object that) {
@@ -111,11 +85,11 @@ public class UserModel implements Serializable {
         }
         UserModel other = (UserModel) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getAccountNumber() == null ? other.getAccountNumber() == null : this.getAccountNumber().equals(other.getAccountNumber()))
-            && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
-            && (this.getNickname() == null ? other.getNickname() == null : this.getNickname().equals(other.getNickname()))
-            && (this.getAvatar() == null ? other.getAvatar() == null : this.getAvatar().equals(other.getAvatar()))
-            && (this.getSignInTime() == null ? other.getSignInTime() == null : this.getSignInTime().equals(other.getSignInTime()));
+                && (this.getAccountNumber() == null ? other.getAccountNumber() == null : this.getAccountNumber().equals(other.getAccountNumber()))
+                && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
+                && (this.getNickname() == null ? other.getNickname() == null : this.getNickname().equals(other.getNickname()))
+                && (this.getAvatar() == null ? other.getAvatar() == null : this.getAvatar().equals(other.getAvatar()))
+                && (this.getSignInTime() == null ? other.getSignInTime() == null : this.getSignInTime().equals(other.getSignInTime()));
     }
 
     @Override

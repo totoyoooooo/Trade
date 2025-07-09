@@ -19,4 +19,8 @@
         update sh_chat_message set has_read = 1
         where chat_id = #{chat_id} and sender_id != #{sender_id}
     </update>
+    <update id="revokeChatMessage">
+        update sh_chat_message set has_revoke = 1
+        where id = #{id}
+    </update>
 </mapper>

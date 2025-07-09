@@ -42,6 +42,11 @@ public class ChatController {
                 List<ChatMessageModel> message = getMessage(chatModel.getId());
                 if(!message.isEmpty()){
                     Long unreadCount = 0L;
+                    List<ChatMessageModel> remove = new ArrayList<>();
+                    for(ChatMessageModel chatMessageModel : message){
+                        if(chatMessageModel.getHas_revoke() == 1) remove.add(chatMessageModel);
+                    }
+                    message.removeAll(remove);
                     for(ChatMessageModel chatMessageModel : message){
                         if(!chatMessageModel.getSender_id().equals(userId) && chatMessageModel.getHas_read() == 0) unreadCount++;
                     }
@@ -85,6 +90,7 @@ public class ChatController {
             chatModel = chatService.getChatById(chatModel.getId());
         }
         List<ChatMessageModel> chatMessageModelList = getMessage(chatModel.getId());
+        List<ChatMessageModel> remove = new ArrayList<>();
         for(ChatMessageModel chatMessageModel : chatMessageModelList){
             if(chatModel.getGetterId().equals(chatMessageModel.getSender_id())){
                 chatMessageModel.setIsMe(1);
@@ -93,7 +99,9 @@ public class ChatController {
                 chatMessageModel.setIsMe(0);
                 chatMessageModel.setAvatar(userService.getUser(chatModel.getOtherUserId()).getAvatar());
             }
+            if(chatMessageModel.getHas_revoke() == 1) remove.add(chatMessageModel);
         }
+        chatMessageModelList.removeAll(remove);
         Map<String,Object> ans = new LinkedHashMap<>();
         ans.put("chatId",chatModel.getId());
         ans.put("otherUser",userService.getUser(chatModel.getOtherUserId()));
@@ -119,6 +127,12 @@ public class ChatController {
     @PostMapping("clearUnread")
     public ResultVo clearUnread(@RequestParam String chat_id,@RequestParam Long sender_id) {
         chatMessageService.readChatMessage(chat_id,sender_id);
+        return ResultVo.success();
+    }
+
+    @PostMapping("revokeMessage")
+    public ResultVo revokeMessage(@RequestParam Long id) {
+        chatMessageService.revokeChatMessage(id);
         return ResultVo.success();
     }
 

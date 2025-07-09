@@ -1,12 +1,13 @@
 package com.second.hand.trading.server.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * sh_favorite
- * @author 
- */
+@Getter
+@Setter
 public class FavoriteModel implements Serializable {
     /**
      * 自增主键id
@@ -32,46 +33,6 @@ public class FavoriteModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getIdleId() {
-        return idleId;
-    }
-
-    public void setIdleId(Long idleId) {
-        this.idleId = idleId;
-    }
-
-    public IdleItemModel getIdleItem() {
-        return idleItem;
-    }
-
-    public void setIdleItem(IdleItemModel idleItem) {
-        this.idleItem = idleItem;
-    }
-
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -85,9 +46,9 @@ public class FavoriteModel implements Serializable {
         }
         FavoriteModel other = (FavoriteModel) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getIdleId() == null ? other.getIdleId() == null : this.getIdleId().equals(other.getIdleId()));
+                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
+                && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+                && (this.getIdleId() == null ? other.getIdleId() == null : this.getIdleId().equals(other.getIdleId()));
     }
 
     @Override

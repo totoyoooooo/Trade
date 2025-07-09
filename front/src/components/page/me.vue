@@ -22,6 +22,10 @@
                             <div class="user-info-details-text-nickname">{{userInfo.nickname}}</div>
                             <div class="user-info-details-text-time">{{userInfo.signInTime}} 加入平台</div>
                             <div class="user-info-details-text-edit">
+                                <div class="user-info-trade-info">
+                                    <div class="trade-count">交易次数：{{ userInfo.tradeCount || 0 }}</div>
+                                    <div class="applause-rate">好评率：{{ userInfo.applauseRate != null ? userInfo.applauseRate + '%' : '0%' }}</div>
+                                </div>
                                 <el-button type="primary" plain @click="userInfoDialogVisible = true">编辑个人信息</el-button>
                             </div>
                             <el-dialog
@@ -77,6 +81,7 @@
                         <el-tab-pane label="我收藏的" name="3"></el-tab-pane>
                         <el-tab-pane label="我卖出的" name="4"></el-tab-pane>
                         <el-tab-pane label="我买到的" name="5"></el-tab-pane>
+                        <el-tab-pane label="我屏蔽的" name="6"></el-tab-pane>
                     </el-tabs>
                     <div class="idle-container-list">
                         <div v-for="(item,index) in dataList[activeName-1]" class="idle-container-list-item">
@@ -94,7 +99,6 @@
                                         {{item.idleName}}
                                     </div>
                                     <div class="idle-container-list-idle-details" v-html="item.idleDetails">
-                                        {{item.idleDetails}}
                                     </div>
                                     <div class="idle-container-list-idle-time">{{item.timeStr}}</div>
 
@@ -227,7 +231,7 @@
                     defaultFlag: false
                 },
                 activeName: '1',
-                handleName: ['下架', '删除', '取消收藏', '', ''],
+                handleName: ['下架', '删除', '取消收藏', '', '', '取消屏蔽'],
                 dataList: [
                     [],
                     [],
@@ -276,6 +280,7 @@
             this.getMyOrder();
             this.getMySoldIdle();
             this.getMyFavorite();
+            this.getMyShield();
         },
         methods: {
             getMyFavorite(){
@@ -362,6 +367,24 @@
                         }
                         console.log(data);
                         this.addressData = data;
+                    }
+                })
+            },
+            getMyShield(){
+                this.$api.getMyShield().then(res=>{
+                    if (res.status_code === 200){
+                        for (let i = 0; i < res.data.length; i++) {
+                            let pictureList = JSON.parse(res.data[i].idleItem.pictureList);
+                            this.dataList[5].push({
+                                shieldId:res.data[i].id,
+                                id:res.data[i].idleItem.id,
+                                imgUrl:pictureList.length > 0 ? pictureList[0] : '',
+                                idleName:res.data[i].idleItem.idleName,
+                                idleDetails:res.data[i].idleItem.idleDetails,
+                                timeStr:res.data[i].createTime.substring(0, 10) + " " + res.data[i].createTime.substring(11, 19),
+                                idlePrice:res.data[i].idleItem.idlePrice
+                            });
+                        }
                     }
                 })
             },
@@ -512,6 +535,22 @@
                                     type: 'success'
                                 });
                                 this.dataList[2].splice(index,1);
+                            }else {
+                                this.$message.error(res.msg)
+                            }
+                        }).catch(e=>{
+                        })
+                    }else if(activeName==='6'){
+                        this.$api.deleteShield({
+                            id: item.shieldId
+                        }).then(res=>{
+                            console.log(res);
+                            if(res.status_code===200){
+                                this.$message({
+                                    message: '已取消屏蔽！',
+                                    type: 'success'
+                                });
+                                this.dataList[5].splice(index,1);
                             }else {
                                 this.$message.error(res.msg)
                             }

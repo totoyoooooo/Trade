@@ -15,6 +15,10 @@
                             <div class="user-info-details-text-time">{{userInfo.signInTime}} 加入平台</div>
                             <div class="user-info-details-text-edit">
                                 <el-button type="primary" plain @click="toChat()">私信</el-button>
+                                <div class="user-info-trade-info">
+                                <div class="trade-count">交易次数：{{ userInfo.tradeCount || 0 }}</div>
+                                <div class="applause-rate">好评率：{{ userInfo.applauseRate != null ? userInfo.applauseRate + '%' : '0%' }}</div>
+    </div>
                             </div>
                         </div>
                     </div>
@@ -266,5 +270,19 @@
         width: 800px;
         display: flex;
         justify-content: space-between;
+    }
+    .user-info-trade-info {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 20px;
+    text-align: left;
+    }
+    .trade-count {
+        font-size: 14px;
+        color: #333;
+    }
+    .applause-rate {
+        font-size: 13px;
+        margin-top: 2px;
     }
 </style>

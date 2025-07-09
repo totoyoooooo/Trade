@@ -11,7 +11,7 @@
     id, create_time, user_id, idle_id
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select 
+    select
     <include refid="Base_Column_List" />
     from sh_favorite
     where id = #{id,jdbcType=BIGINT}
@@ -33,9 +33,9 @@
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.second.hand.trading.server.model.FavoriteModel" useGeneratedKeys="true">
     insert into sh_favorite (create_time, user_id, idle_id
-      )
+    )
     values (#{createTime,jdbcType=TIMESTAMP}, #{userId,jdbcType=BIGINT}, #{idleId,jdbcType=BIGINT}
-      )
+           )
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.second.hand.trading.server.model.FavoriteModel" useGeneratedKeys="true">
     insert into sh_favorite
@@ -80,8 +80,13 @@
   <update id="updateByPrimaryKey" parameterType="com.second.hand.trading.server.model.FavoriteModel">
     update sh_favorite
     set create_time = #{createTime,jdbcType=TIMESTAMP},
-      user_id = #{userId,jdbcType=BIGINT},
-      idle_id = #{idleId,jdbcType=BIGINT}
+        user_id = #{userId,jdbcType=BIGINT},
+        idle_id = #{idleId,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  <select id="getFavoriteByIdleItem" resultMap="BaseResultMap">
+    select *
+    from sh_favorite
+    where idle_id = #{idleId}
+  </select>
 </mapper>
