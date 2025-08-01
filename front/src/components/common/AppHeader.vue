@@ -138,6 +138,7 @@
                 this.$api.logout().then(res=>{
                     if(res.status_code===200){
                         this.$globalData.userInfo={};
+                        //this.$webSocket.close();
                         console.log("login out");
                         if ('/index' === this.$route.path) {
                             this.$router.go(0);

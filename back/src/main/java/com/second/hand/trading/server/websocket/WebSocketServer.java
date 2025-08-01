@@ -31,6 +31,8 @@ public class WebSocketServer {
         webSocketSet.add(this);
         onlineStatusMap.put(userId, true);
         onlineCount.incrementAndGet();
+        //给每个用户在线用户发送上线消息;
+        sendAllMessage("{\"type\":\"online\"}");
     }
 
     @OnMessage
@@ -43,6 +45,7 @@ public class WebSocketServer {
 
             Long targetId = rootNode.path("target").asLong();
             String data = rootNode.path("data").toString();
+            System.out.println(data);
 
             Session targetSession = userSessions.get(targetId);
             if (targetSession != null && targetSession.isOpen()) {

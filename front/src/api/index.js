@@ -434,6 +434,9 @@ const webSocket = {
                     window.Vue.prototype.$bus.$emit('new-leave-message', JSON.parse(event.data).content);
                 }else if(JSON.parse(event.data).type == "revoke"){
                     window.Vue.prototype.$bus.$emit('revoke-message', JSON.parse(event.data).content);
+                }else if(JSON.parse(event.data).type == "online"){
+                    console.log("上线啦");
+                    window.Vue.prototype.$bus.$emit('online');
                 }
             }
         };
@@ -444,7 +447,14 @@ const webSocket = {
         } else {
             console.error('WebSocket is not open');
         }
-    }
+    },
+    closeWebSocket(){
+         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.close();
+        } else {
+            console.error('WebSocket is not open');
+        }
+    },
 };
 
 export default api;

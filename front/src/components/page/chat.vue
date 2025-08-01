@@ -73,8 +73,6 @@
 </template>
 
 <script>
-import { data } from 'jquery';
-
 
 export default {
   name: 'Chat',
@@ -154,7 +152,6 @@ export default {
           this.otherUser = res.data.otherUser;
           this.chatId = res.data.chatId;
           this.messages = res.data.messages;
-          console.log(this.messages);
           this.$nextTick(() => {
             this.scrollToBottom();
           });
