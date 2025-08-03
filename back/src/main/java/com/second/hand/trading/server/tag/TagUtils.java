@@ -268,7 +268,8 @@ public class TagUtils {
             }
             for(TagObject t : getTagObjects(userModel.getShieldTag())){
                 if(tagModel.getText().equals(t.getText())){
-                    recommendation *= 0.5;
+                    if(recommendation >= 0) recommendation *= 0.5;
+                    else recommendation *= 1.5;
                     break;
                 }
             }
