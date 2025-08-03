@@ -427,7 +427,6 @@ const webSocket = {
         };
         this.ws.onmessage = (event) => {
             if (window.Vue && window.Vue.prototype && window.Vue.prototype.$bus) {
-                console.log('WebSocket message received:' + JSON.parse(event.data));
                 if(JSON.parse(event.data).type == "chat"){
                     window.Vue.prototype.$bus.$emit('new-message', JSON.parse(event.data).content);
                 }else if(JSON.parse(event.data).type == "message"){
@@ -435,7 +434,6 @@ const webSocket = {
                 }else if(JSON.parse(event.data).type == "revoke"){
                     window.Vue.prototype.$bus.$emit('revoke-message', JSON.parse(event.data).content);
                 }else if(JSON.parse(event.data).type == "online"){
-                    console.log("上线啦");
                     window.Vue.prototype.$bus.$emit('online');
                 }
             }

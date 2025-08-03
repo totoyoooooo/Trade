@@ -2,23 +2,20 @@ package com.second.hand.trading.server.websocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.second.hand.trading.server.service.ChatService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @ServerEndpoint("/websocket/{userId}")
 @Component
 public class WebSocketServer {
-    private static final Set<WebSocketServer> webSocketSet = Collections.synchronizedSet(new HashSet<>());
     // 用于存储用户的在线状态
-    private static final Map<Long, Boolean> onlineStatusMap = Collections.synchronizedMap(new HashMap<>());
-    private static final AtomicInteger onlineCount = new AtomicInteger(0);
+    private static final Map<Long, WebSocketServer> onlineStatusMap = Collections.synchronizedMap(new HashMap<>());
     private Session session;
     private Long userId;
     private static final Map<Long,Session> userSessions = new LinkedHashMap<>();
@@ -28,10 +25,8 @@ public class WebSocketServer {
         this.session = session;
         userSessions.put(userId, session);
         this.userId = userId;
-        webSocketSet.add(this);
-        onlineStatusMap.put(userId, true);
-        onlineCount.incrementAndGet();
-        //给每个用户在线用户发送上线消息;
+        onlineStatusMap.put(userId, this);
+        //给每个在线用户发送消息;
         sendAllMessage("{\"type\":\"online\"}");
     }
 
@@ -59,9 +54,9 @@ public class WebSocketServer {
 
     @OnClose
     public void onClose() {
-        webSocketSet.remove(this);
         onlineStatusMap.remove(userId);
-        onlineCount.decrementAndGet();
+        //给每个在线用户发送消息;
+        sendAllMessage("{\"type\":\"online\"}");
     }
 
     @OnError
@@ -70,19 +65,22 @@ public class WebSocketServer {
         error.printStackTrace();
     }
 
-    public static void sendAllMessage(String message) {
-        for (WebSocketServer webSocket : webSocketSet) {
-            try {
-                webSocket.session.getBasicRemote().sendText(message);
-            } catch (IOException e) {
-                e.printStackTrace();
+    public void sendAllMessage(String message) {
+        for (WebSocketServer webSocket : onlineStatusMap.values()) {
+            Session session = webSocket.session;
+            if (session != null && session.isOpen()) {
+                session.getAsyncRemote().sendText(message, result -> {
+                    if (!result.isOK()) {
+                        System.err.println("发送失败: " + result.getException());
+                    }
+                });
             }
         }
     }
 
     // 获取用户在线状态
     public static boolean isOnline(Long userId) {
-        return onlineStatusMap.getOrDefault(userId, false);
+        return onlineStatusMap.containsKey(userId);
     }
 
 }

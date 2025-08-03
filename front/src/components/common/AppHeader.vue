@@ -140,6 +140,7 @@
                         this.$globalData.userInfo={};
                         //this.$webSocket.close();
                         console.log("login out");
+                        this.$webSocket.closeWebSocket();
                         if ('/index' === this.$route.path) {
                             this.$router.go(0);
                         }else {
