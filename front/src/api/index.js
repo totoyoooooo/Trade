@@ -381,6 +381,13 @@ const api = {
             data: query
         });
     },
+    getAllTag(query) {
+        return request({
+            url: '/tag/getAllTag',
+            method: 'post',
+            data: query
+        });
+    },
     addShield(data) {
         return request({
             url: '/shield/add',

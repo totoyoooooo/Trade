@@ -1,5 +1,6 @@
 package com.second.hand.trading.server.controller;
 
+import com.second.hand.trading.server.enums.ErrorMsg;
 import com.second.hand.trading.server.model.TagModel;
 import com.second.hand.trading.server.service.TagService;
 import com.second.hand.trading.server.tag.TagUtils;
@@ -41,6 +42,15 @@ public class TagController {
             return ResultVo.success(list);
         }
         return ResultVo.fail();
+    }
+
+    @PostMapping("getAllTag")
+    public ResultVo getAllTag() {
+        List<TagModel> list = tagService.getAllTag();
+        if (list == null) {
+            return ResultVo.fail(ErrorMsg.SYSTEM_ERROR);
+        }
+        return ResultVo.success(list);
     }
 
 }

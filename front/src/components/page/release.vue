@@ -9,41 +9,83 @@
                               maxlength="30"
                               show-word-limit>
                     </el-input>
+                    <!-- Popover 容器: 结合了输入建议和所有标签列表 -->
                     <el-popover
-                        v-model="showTagDropdown"
+                        ref="popover"
+                        v-model="showTagPopover"
                         placement="bottom-start"
                         trigger="manual"
-                        :width="300"
+                        :width="350"
                         :visible-arrow="false"
                         :append-to-body="false"
-                        >
-                        <div v-if="tagSuggestions.length">
-                            <div
-                            v-for="(item, idx) in tagSuggestions"
-                            :key="item.text"
-                            :class="['tag-suggestion-item', {active: idx === highlightedIdx}]"
-                            @mousedown.prevent="selectTagSuggestion(item)"
-                            style="display:flex;justify-content:space-between;cursor:pointer;padding:4px 8px;"
-                            @mouseenter="highlightedIdx = idx">
-                                <span>{{ item.text }}</span>
-                                <span style="color:#888;font-size:12px;">被引用{{ item.use_count }}次</span>
+                        popper-class="tag-popover"
+                    >
+                        <!-- 视图容器 -->
+                        <div class="popover-content" @mousedown.prevent>
+                            <!-- 视图一: 输入建议 -->
+                            <div v-if="tagViewMode === 'suggestions'">
+                                <div v-if="tagSuggestions.length">
+                                    <div
+                                        v-for="(item, idx) in tagSuggestions"
+                                        :key="item.text"
+                                        :class="['tag-suggestion-item', {active: idx === highlightedIdx}]"
+                                        @mousedown.prevent="selectTagSuggestion(item)"
+                                        @mouseenter="highlightedIdx = idx">
+                                        <span>{{ item.text }}</span>
+                                        <span class="use-count">被引用{{ item.use_count }}次</span>
+                                    </div>
+                                </div>
+                                <div v-else class="no-suggestions">暂无建议</div>
+                                <div class="popover-footer">
+                                    <el-button type="text" @mousedown.prevent @click="switchToAllTagsView">查看所有标签</el-button>
+                                </div>
+                            </div>
+
+                            <!-- 视图二: 所有标签列表 -->
+                            <div v-if="tagViewMode === 'all'">
+                                <div class="popover-header">
+                                    <span>所有标签</span>
+                                    <el-button type="text" @mousedown.prevent @click="switchToSuggestionsView">返回</el-button>
+                                </div>
+                                <div v-if="paginatedTags.length" class="all-tags-list">
+                                    <el-tag
+                                        v-for="tag in paginatedTags"
+                                        :key="tag.text"
+                                        class="tag-item"
+                                        effect="plain"
+                                        @mousedown.prevent
+                                        @click="selectTagFromAll(tag)"
+                                    >
+                                        {{ tag.text }}
+                                    </el-tag>
+                                </div>
+                                <div v-else class="no-suggestions">暂无标签</div>
+                                <el-pagination
+                                    v-if="allTags.length > pageSize"
+                                    small
+                                    layout="prev, pager, next"
+                                    :total="allTags.length"
+                                    :page-size="pageSize"
+                                    v-model:current-page="currentPage"
+                                    class="tag-pagination"
+                                    @mousedown.prevent
+                                ></el-pagination>
                             </div>
                         </div>
-                        <div v-else style="color:#aaa;padding:4px 8px;">暂无建议</div>
+
+                        <!-- 触发 popover 的输入框 -->
                         <el-input
-                        class="release-idle-tag-text"
-                        slot="reference"
-                        ref="tagInput"
-                        v-model="idleItemInfo.idleTag"
-                        placeholder="请输入物品标签(#开头)"
-                        @input="onTagInputChange"
-                        @focus="onTagInputChange"
-                        @blur="onTagInputBlur"
-                        @keyup.native="onCursorMove"
-                        @mouseup.native="onCursorMove"
-                        @keydown.down.native="highlightNext"
-                        @keydown.up.native="highlightPrev"
-                        @keydown.enter.native="selectHighlighted"
+                            class="release-idle-tag-text"
+                            slot="reference"
+                            ref="tagInput"
+                            v-model="idleItemInfo.idleTag"
+                            placeholder="请输入物品标签(#开头)，或点击选择"
+                            @input="onTagInputChange"
+                            @focus="onTagInputFocus"
+                            @blur="onTagInputBlur"
+                            @keydown.down.native.prevent="highlightNext"
+                            @keydown.up.native.prevent="highlightPrev"
+                            @keydown.enter.native.prevent="selectHighlighted"
                         ></el-input>
                     </el-popover>
                     <el-input
@@ -125,7 +167,6 @@
     import AppBody from '../common/AppPageBody.vue'
     import AppFoot from '../common/AppFoot.vue'
     import options from '../common/country-data.js'
-import { isArray } from 'jquery';
 
     export default {
         name: "release",
@@ -158,9 +199,15 @@ import { isArray } from 'jquery';
                     label: '其他'
                 }],
                 imgList:[],
+                // --- 标签功能相关数据 ---
                 tagSuggestions: [],
-    showTagDropdown: false,
-    highlightedIdx: 0,
+                showTagPopover: false,
+                highlightedIdx: 0,
+                tagViewMode: 'suggestions', // 'suggestions' or 'all'
+                allTags: [],
+                currentPage: 1,
+                pageSize: 18, // 每页显示18个标签
+
                 idleItemInfo:{
                     idleName:'',
                     idleTag:'',
@@ -172,6 +219,21 @@ import { isArray } from 'jquery';
                 }
             };
         },
+        computed: {
+            // 计算当前页应显示的标签
+            paginatedTags() {
+                const start = (this.currentPage - 1) * this.pageSize;
+                const end = start + this.pageSize;
+                return this.allTags.slice(start, end);
+            }
+        },
+        mounted() {
+            // 添加全局点击监听器来处理点击外部关闭弹窗
+            document.addEventListener('click', this.handleGlobalClick);
+        },
+        beforeDestroy() {
+            document.removeEventListener('click', this.handleGlobalClick);
+        },
         created() {
             const userId = this.getCookie && this.getCookie('shUserId');
             if (!userId) {
@@ -179,6 +241,8 @@ import { isArray } from 'jquery';
                 this.$router.push('/login');
                 return;
             }
+            // 初始化时获取所有标签
+            this.fetchAllTags();
         },  
         methods: {
             handleChange(value) {
@@ -259,8 +323,75 @@ import { isArray } from 'jquery';
                 }
                 return "";
             },
-            onCursorMove() {
-                this.updateTagSuggestions();
+            // --- 标签相关方法 ---
+            // 获取所有标签
+            fetchAllTags() {
+                this.$api.getAllTag().then(res => {
+                    if (res.status_code === 200 && Array.isArray(res.data)) {
+                        this.allTags = res.data;
+                    }
+                }).catch(e => {
+                    console.error("获取所有标签失败:", e);
+                });
+            },
+            // 全局点击处理器，用于关闭弹窗
+            handleGlobalClick(event) {
+                if (!this.showTagPopover) return;
+
+                const popoverEl = this.$refs.popover ? this.$refs.popover.$el : null;
+                const inputEl = this.$refs.tagInput ? this.$refs.tagInput.$el : null;
+
+                // 如果点击的是输入框或弹窗内部，不关闭弹窗
+                if ((inputEl && inputEl.contains(event.target)) ||
+                    (popoverEl && popoverEl.contains(event.target))) {
+                    return;
+                }
+
+                this.showTagPopover = false;
+            },
+            // 切换到所有标签视图
+            switchToAllTagsView() {
+                this.tagViewMode = 'all';
+                this.showTagPopover = true; // 确保popover是打开的
+            },
+            // 切换到建议视图
+            switchToSuggestionsView() {
+                this.tagViewMode = 'suggestions';
+                this.updateTagSuggestions(); // 重新获取建议
+            },
+            // 当输入框获得焦点时
+            onTagInputFocus() {
+                this.showTagPopover = true;
+                // 如果当前没有输入有效的tag搜索，或者光标不在tag内，打开“所有标签”视图
+                const info = this.getCurrentTagInfo();
+                if (!info || !info.tagText || info.tagText.trim() === '#') {
+                    this.tagViewMode = 'all';
+                } else {
+                    this.tagViewMode = 'suggestions';
+                    this.updateTagSuggestions();
+                }
+            },
+            // 失焦处理
+            onTagInputBlur() {
+                // 使用延时
+                setTimeout(() => {
+                    // 检查是否有活跃的焦点元素在弹窗内
+                    const popoverEl = this.$refs.popover ? this.$refs.popover.$el : null;
+                    const activeElement = document.activeElement;
+
+                    if (!popoverEl || !popoverEl.contains(activeElement)) {
+                        this.showTagPopover = false;
+                    }
+                }, 150);
+            },
+            // 当输入框内容变化时
+            async onTagInputChange() {
+                // 每次输入都回到建议视图
+                this.tagViewMode = 'suggestions';
+                if (!this.showTagPopover) {
+                    this.showTagPopover = true;
+                }
+                await this.updateTagSuggestions();
             },
             getCurrentTagInfo() {
                 const input = this.idleItemInfo.idleTag || '';
@@ -305,20 +436,32 @@ import { isArray } from 'jquery';
                 const tagText = input.substring(start, end);
                 return { tagText, start, end };
             },
-            onTagInputBlur() {
-                this.showTagDropdown = false;
-            },
+            // 更新建议列表
             async updateTagSuggestions() {
                 const info = this.getCurrentTagInfo();
                 if (!info || !info.tagText || info.tagText === '#') {
                     this.tagSuggestions = [];
-                    this.showTagDropdown = false;
                     return;
                 }
                 const res = await this.$api.getAkinTag("text=" + info.tagText).catch(() => ({data: []}));
                 this.tagSuggestions = Array.isArray(res.data) ? res.data : [];
-                this.showTagDropdown = this.tagSuggestions.length > 0;
                 this.highlightedIdx = 0;
+            },
+            // 从所有标签列表中选择一个标签
+            selectTagFromAll(tag) {
+                let currentTags = this.idleItemInfo.idleTag.trim();
+                const newTag = tag.text;
+                // 检查是否已存在
+                const tagsArray = currentTags.match(/#[^\s#]+/g) || [];
+                if (tagsArray.includes(newTag)) {
+                    return; // 如果已存在，则不添加
+                }
+                // 添加新标签，并确保前面有空格
+                if (currentTags && !currentTags.endsWith(' ')) {
+                    this.idleItemInfo.idleTag += ' ';
+                }
+                this.idleItemInfo.idleTag += newTag;
+                // 选择后不需要关闭popover，可以连续选择
             },
             // fetch-suggestions
             queryTagSuggestions(queryString, cb) {
@@ -339,53 +482,50 @@ import { isArray } from 'jquery';
                     });
                 });
             },
+            // 从建议列表中选择
             selectTagSuggestion(item) {
                 const input = this.idleItemInfo.idleTag || '';
-                const inputEl = this.$refs.tagInput.$el.querySelector('input');
                 const info = this.getCurrentTagInfo();
                 if (!info) return;
+
                 this.idleItemInfo.idleTag = input.substring(0, info.start) + item.text + input.substring(info.end);
+                this.showTagPopover = false;
+
                 this.$nextTick(() => {
+                    const inputEl = this.$refs.tagInput.$el.querySelector('input');
                     if (inputEl) {
-                        inputEl.selectionStart = inputEl.selectionEnd = info.start + item.text.length;
+                        const pos = info.start + item.text.length;
+                        inputEl.selectionStart = inputEl.selectionEnd = pos;
                         inputEl.focus();
                     }
                 });
             },
-            async onTagInputChange() {
-                await this.updateTagSuggestions();
-            },
-            selectTagSuggestion(item) {
-                const input = this.idleItemInfo.idleTag || '';
-                const info = this.getCurrentTagInfo();
-                if (!info) return;
-                this.idleItemInfo.idleTag = input.substring(0, info.start) + item.text + input.substring(info.end);
-                this.showTagDropdown = false;
-                this.$nextTick(() => {
-                const inputEl = this.$refs.tagInput.$el.querySelector('input');
-                if (inputEl) {
-                    inputEl.selectionStart = inputEl.selectionEnd = info.start + item.text.length;
-                    inputEl.focus();
-                }
-                });
-            },
-            // 键盘上下选择
+            // 键盘高亮下一个
             highlightNext() {
-                if (!this.showTagDropdown) return;
+                if (!this.showTagPopover || this.tagViewMode !== 'suggestions' || !this.tagSuggestions.length) return;
                 this.highlightedIdx = (this.highlightedIdx + 1) % this.tagSuggestions.length;
             },
+            // 键盘高亮上一个
             highlightPrev() {
-                if (!this.showTagDropdown) return;
+                if (!this.showTagPopover || this.tagViewMode !== 'suggestions' || !this.tagSuggestions.length) return;
                 this.highlightedIdx = (this.highlightedIdx - 1 + this.tagSuggestions.length) % this.tagSuggestions.length;
             },
+            // 键盘回车选择
             selectHighlighted() {
-                if (this.showTagDropdown && this.tagSuggestions[this.highlightedIdx]) {
-                this.selectTagSuggestion(this.tagSuggestions[this.highlightedIdx]);
+                if (this.showTagPopover && this.tagViewMode === 'suggestions' && this.tagSuggestions[this.highlightedIdx]) {
+                    this.selectTagSuggestion(this.tagSuggestions[this.highlightedIdx]);
                 }
             },
         }
     }
 </script>
+
+<style>
+/* 将 popover 的内边距设为0，以便内容可以撑满 */
+.tag-popover {
+    padding: 0 !important;
+}
+</style>
 
 <style scoped>
     .release-idle-container {
@@ -440,7 +580,55 @@ import { isArray } from 'jquery';
         align-items: center;
         height: 100px;
     }
-    .tag-suggestion-item.active {
+    /* --- 标签弹出框样式 --- */
+    .popover-content {
+        line-height: 1.5;
+    }
+    .tag-suggestion-item {
+        display: flex;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 6px 12px;
+    }
+    .tag-suggestion-item:hover, .tag-suggestion-item.active {
         background: #f5f7fa;
+    }
+    .use-count {
+        color:#888;
+        font-size:12px;
+    }
+    .no-suggestions {
+        color:#aaa;
+        padding:8px 12px;
+    }
+    .popover-footer {
+        border-top: 1px solid #EBEEF5;
+        text-align: center;
+        padding: 4px 0;
+    }
+    .popover-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid #EBEEF5;
+        font-weight: bold;
+        color: #303133;
+    }
+    .all-tags-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .tag-item {
+        cursor: pointer;
+    }
+    .tag-pagination {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 8px;
     }
 </style>
