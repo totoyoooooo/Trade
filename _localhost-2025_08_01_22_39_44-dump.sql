@@ -23,17 +23,17 @@ DROP TABLE IF EXISTS `sh_address`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_address` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `consignee_name` varchar(32) NOT NULL COMMENT '收货人姓名',
-  `consignee_phone` varchar(16) NOT NULL COMMENT '收货人手机号',
-  `province_name` varchar(32) NOT NULL COMMENT '省',
-  `city_name` varchar(32) NOT NULL COMMENT '市',
-  `region_name` varchar(32) NOT NULL COMMENT '区',
-  `detail_address` varchar(64) NOT NULL COMMENT '详细地址',
-  `default_flag` tinyint NOT NULL COMMENT '是否默认地址',
-  `user_id` bigint NOT NULL COMMENT '用户主键id',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `user_id_index` (`user_id`) USING BTREE
+                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+                              `consignee_name` varchar(32) NOT NULL COMMENT '收货人姓名',
+                              `consignee_phone` varchar(16) NOT NULL COMMENT '收货人手机号',
+                              `province_name` varchar(32) NOT NULL COMMENT '省',
+                              `city_name` varchar(32) NOT NULL COMMENT '市',
+                              `region_name` varchar(32) NOT NULL COMMENT '区',
+                              `detail_address` varchar(64) NOT NULL COMMENT '详细地址',
+                              `default_flag` tinyint NOT NULL COMMENT '是否默认地址',
+                              `user_id` bigint NOT NULL COMMENT '用户主键id',
+                              PRIMARY KEY (`id`) USING BTREE,
+                              KEY `user_id_index` (`user_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -55,12 +55,12 @@ DROP TABLE IF EXISTS `sh_admin`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_admin` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `account_number` varchar(16) NOT NULL COMMENT '管理员账号',
-  `admin_password` varchar(16) NOT NULL COMMENT '密码',
-  `admin_name` varchar(8) NOT NULL COMMENT '管理员名字',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `account_number` (`account_number`) USING BTREE
+                            `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+                            `account_number` varchar(16) NOT NULL COMMENT '管理员账号',
+                            `admin_password` varchar(16) NOT NULL COMMENT '密码',
+                            `admin_name` varchar(8) NOT NULL COMMENT '管理员名字',
+                            PRIMARY KEY (`id`) USING BTREE,
+                            UNIQUE KEY `account_number` (`account_number`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -82,14 +82,14 @@ DROP TABLE IF EXISTS `sh_chat`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_chat` (
-  `id` varchar(255) NOT NULL,
-  `user1_id` bigint DEFAULT NULL,
-  `user2_id` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_user1` (`user1_id`),
-  KEY `fk_user2` (`user2_id`),
-  CONSTRAINT `fk_user1` FOREIGN KEY (`user1_id`) REFERENCES `sh_user` (`id`),
-  CONSTRAINT `fk_user2` FOREIGN KEY (`user2_id`) REFERENCES `sh_user` (`id`)
+                           `id` varchar(255) NOT NULL,
+                           `user1_id` bigint DEFAULT NULL,
+                           `user2_id` bigint DEFAULT NULL,
+                           PRIMARY KEY (`id`),
+                           KEY `fk_user1` (`user1_id`),
+                           KEY `fk_user2` (`user2_id`),
+                           CONSTRAINT `fk_user1` FOREIGN KEY (`user1_id`) REFERENCES `sh_user` (`id`),
+                           CONSTRAINT `fk_user2` FOREIGN KEY (`user2_id`) REFERENCES `sh_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -111,6 +111,7 @@ DROP TABLE IF EXISTS `sh_chat_message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_chat_message` (
+<<<<<<< Updated upstream:_localhost-2025_08_01_22_39_44-dump.sql
   `id` bigint NOT NULL AUTO_INCREMENT,
   `chat_id` varchar(255) DEFAULT NULL,
   `sender_id` bigint DEFAULT NULL,
@@ -123,6 +124,20 @@ CREATE TABLE `sh_chat_message` (
   KEY `fk_sender` (`sender_id`),
   CONSTRAINT `fk_chat` FOREIGN KEY (`chat_id`) REFERENCES `sh_chat` (`id`),
   CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `sh_user` (`id`)
+=======
+                                   `id` bigint NOT NULL AUTO_INCREMENT,
+                                   `chat_id` varchar(255) DEFAULT NULL,
+                                   `sender_id` bigint DEFAULT NULL,
+                                   `content` varchar(255) DEFAULT NULL,
+                                   `send_time` datetime DEFAULT NULL,
+                                   `has_read` int DEFAULT '0',
+                                   `has_revoke` int DEFAULT '0',
+                                   PRIMARY KEY (`id`),
+                                   KEY `fk_chat` (`chat_id`),
+                                   KEY `fk_sender` (`sender_id`),
+                                   CONSTRAINT `fk_chat` FOREIGN KEY (`chat_id`) REFERENCES `sh_chat` (`id`),
+                                   CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `sh_user` (`id`)
+>>>>>>> Stashed changes:db_second_hand_trading_localhost-2025_07_09_16_10_20-dump.sql
 ) ENGINE=InnoDB AUTO_INCREMENT=349 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -207,18 +222,18 @@ DROP TABLE IF EXISTS `sh_message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_message` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `user_id` bigint NOT NULL COMMENT '用户主键id',
-  `idle_id` bigint NOT NULL COMMENT '闲置主键id',
-  `content` varchar(256) NOT NULL COMMENT '留言内容',
-  `create_time` datetime NOT NULL COMMENT '留言时间',
-  `to_user` bigint NOT NULL COMMENT '所回复的用户',
-  `to_message` bigint DEFAULT NULL COMMENT '所回复的留言',
-  `has_read` int DEFAULT '0',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `user_id_index` (`user_id`) USING BTREE,
-  KEY `idle_id_index` (`idle_id`) USING BTREE,
-  KEY `to_user_index` (`to_user`) USING BTREE
+                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+                              `user_id` bigint NOT NULL COMMENT '用户主键id',
+                              `idle_id` bigint NOT NULL COMMENT '闲置主键id',
+                              `content` varchar(256) NOT NULL COMMENT '留言内容',
+                              `create_time` datetime NOT NULL COMMENT '留言时间',
+                              `to_user` bigint NOT NULL COMMENT '所回复的用户',
+                              `to_message` bigint DEFAULT NULL COMMENT '所回复的留言',
+                              `has_read` int DEFAULT '0',
+                              PRIMARY KEY (`id`) USING BTREE,
+                              KEY `user_id_index` (`user_id`) USING BTREE,
+                              KEY `idle_id_index` (`idle_id`) USING BTREE,
+                              KEY `to_user_index` (`to_user`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -240,18 +255,18 @@ DROP TABLE IF EXISTS `sh_order`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_order` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `order_number` varchar(32) NOT NULL COMMENT '订单编号',
-  `user_id` bigint NOT NULL COMMENT '用户主键id',
-  `idle_id` bigint NOT NULL COMMENT '闲置物品主键id',
-  `order_price` decimal(10,2) NOT NULL COMMENT '订单总价',
-  `payment_status` tinyint NOT NULL COMMENT '支付状态',
-  `payment_way` varchar(16) DEFAULT NULL COMMENT '支付方式',
-  `create_time` datetime NOT NULL COMMENT '创建时间',
-  `payment_time` datetime DEFAULT NULL COMMENT '支付时间',
-  `order_status` tinyint NOT NULL COMMENT '订单状态',
-  `is_deleted` tinyint DEFAULT NULL COMMENT '是否删除',
-  PRIMARY KEY (`id`) USING BTREE
+                            `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+                            `order_number` varchar(32) NOT NULL COMMENT '订单编号',
+                            `user_id` bigint NOT NULL COMMENT '用户主键id',
+                            `idle_id` bigint NOT NULL COMMENT '闲置物品主键id',
+                            `order_price` decimal(10,2) NOT NULL COMMENT '订单总价',
+                            `payment_status` tinyint NOT NULL COMMENT '支付状态',
+                            `payment_way` varchar(16) DEFAULT NULL COMMENT '支付方式',
+                            `create_time` datetime NOT NULL COMMENT '创建时间',
+                            `payment_time` datetime DEFAULT NULL COMMENT '支付时间',
+                            `order_status` tinyint NOT NULL COMMENT '订单状态',
+                            `is_deleted` tinyint DEFAULT NULL COMMENT '是否删除',
+                            PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -273,14 +288,14 @@ DROP TABLE IF EXISTS `sh_order_address`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_order_address` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增id',
-  `order_id` bigint NOT NULL COMMENT '订单id',
-  `consignee_name` varchar(32) NOT NULL COMMENT '收货人',
-  `consignee_phone` varchar(32) NOT NULL COMMENT '电话',
-  `detail_address` varchar(128) NOT NULL COMMENT '收货地址',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `orderId` (`order_id`) USING BTREE,
-  KEY `order_id_index` (`order_id`) USING BTREE
+                                    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增id',
+                                    `order_id` bigint NOT NULL COMMENT '订单id',
+                                    `consignee_name` varchar(32) NOT NULL COMMENT '收货人',
+                                    `consignee_phone` varchar(32) NOT NULL COMMENT '电话',
+                                    `detail_address` varchar(128) NOT NULL COMMENT '收货地址',
+                                    PRIMARY KEY (`id`) USING BTREE,
+                                    UNIQUE KEY `orderId` (`order_id`) USING BTREE,
+                                    KEY `order_id_index` (`order_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -302,15 +317,15 @@ DROP TABLE IF EXISTS `sh_shield`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_shield` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `create_time` datetime DEFAULT NULL,
-  `user_id` bigint DEFAULT NULL,
-  `idle_id` bigint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `user_id` (`user_id`,`idle_id`),
-  KEY `fk_idle` (`idle_id`),
-  CONSTRAINT `fk_idle` FOREIGN KEY (`idle_id`) REFERENCES `sh_idle_item` (`id`),
-  CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `sh_user` (`id`)
+                             `id` bigint NOT NULL AUTO_INCREMENT,
+                             `create_time` datetime DEFAULT NULL,
+                             `user_id` bigint DEFAULT NULL,
+                             `idle_id` bigint DEFAULT NULL,
+                             PRIMARY KEY (`id`),
+                             UNIQUE KEY `user_id` (`user_id`,`idle_id`),
+                             KEY `fk_idle` (`idle_id`),
+                             CONSTRAINT `fk_idle` FOREIGN KEY (`idle_id`) REFERENCES `sh_idle_item` (`id`),
+                             CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `sh_user` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -331,9 +346,9 @@ DROP TABLE IF EXISTS `sh_tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_tag` (
-  `text` varchar(255) NOT NULL,
-  `use_count` bigint DEFAULT '1',
-  PRIMARY KEY (`text`)
+                          `text` varchar(255) NOT NULL,
+                          `use_count` bigint DEFAULT '1',
+                          PRIMARY KEY (`text`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -355,22 +370,22 @@ DROP TABLE IF EXISTS `sh_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_user` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `account_number` varchar(16) NOT NULL COMMENT '账号（手机号）',
-  `user_password` varchar(16) NOT NULL COMMENT '登录密码',
-  `nickname` varchar(32) NOT NULL COMMENT '昵称',
-  `avatar` varchar(256) NOT NULL COMMENT '头像',
-  `sign_in_time` datetime NOT NULL COMMENT '注册时间',
-  `user_status` tinyint DEFAULT NULL COMMENT '状态（1代表封禁）',
-  `collect_tag` varchar(1024) DEFAULT NULL,
-  `skim_tag` varchar(1024) DEFAULT NULL,
-  `issue_tag` varchar(1024) DEFAULT NULL,
-  `shield_tag` varchar(1024) DEFAULT NULL,
-  `decrease_tag` varchar(1024) DEFAULT NULL,
-  `trade_count` bigint DEFAULT '0',
-  `applause_rate` int DEFAULT '100',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `account_number` (`account_number`) USING BTREE
+                           `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+                           `account_number` varchar(16) NOT NULL COMMENT '账号（手机号）',
+                           `user_password` varchar(16) NOT NULL COMMENT '登录密码',
+                           `nickname` varchar(32) NOT NULL COMMENT '昵称',
+                           `avatar` varchar(256) NOT NULL COMMENT '头像',
+                           `sign_in_time` datetime NOT NULL COMMENT '注册时间',
+                           `user_status` tinyint DEFAULT NULL COMMENT '状态（1代表封禁）',
+                           `collect_tag` varchar(1024) DEFAULT NULL,
+                           `skim_tag` varchar(1024) DEFAULT NULL,
+                           `issue_tag` varchar(1024) DEFAULT NULL,
+                           `shield_tag` varchar(1024) DEFAULT NULL,
+                           `decrease_tag` varchar(1024) DEFAULT NULL,
+                           `trade_count` bigint DEFAULT '0',
+                           `applause_rate` int DEFAULT '100',
+                           PRIMARY KEY (`id`) USING BTREE,
+                           UNIQUE KEY `account_number` (`account_number`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -392,5 +407,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2025-08-01 22:39:44

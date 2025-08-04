@@ -60,9 +60,13 @@
             this.$bus.$off('new-message', this.getUnreadTotal);
             this.$bus.$off('revoke-message', this.getUnreadTotal);
             this.$bus.$off('new-leave-message', this.getUnreadMessageTotal);
+            // remove windows event listener
+            window.removeEventListener('storage', this.handleStorageChange);
         },
         created(){
-            // console.log("header");
+            // multi-pages sync
+            window.addEventListener('storage', this.handleStorageChange);
+            console.log("header");
             if(!this.$globalData.userInfo.nickname){
                 this.$api.getUserInfo().then(res=>{
                     console.log('Header getUserInfo:',res);
@@ -73,6 +77,14 @@
                         this.$globalData.userInfo=res.data;
                         this.isLogin=true;
                         this.$webSocket.init("ws://localhost:8080/websocket/" + res.data.id);
+
+                        // store user info in localstorage
+                        localStorage.setItem('currentUser', JSON.stringify({
+                            nickname: res.data.nickname,
+                            avatar: res.data.avatar,
+                            isLogin: true,
+                            userId: res.data.id
+                        }));
                     }
                 })
             }else {
@@ -80,9 +92,46 @@
                 this.avatar=this.$globalData.userInfo.avatar;
                 this.isLogin=true;
                 this.$webSocket.init("ws://localhost:8080/websocket/" + this.$globalData.userInfo.id);
+
+                // store user info in localstorage
+                localStorage.setItem('currentUser', JSON.stringify({
+                    nickname: this.$globalData.userInfo.nickname,
+                    avatar: this.$globalData.userInfo.avatar,
+                    isLogin: true,
+                    userId: this.$globalData.userInfo.id
+                }));
+                console.log("localStorage stored");
+                console.log("" + this.$globalData.userInfo);
             }
         },
         methods: {
+            handleStorageChange(e) {
+                if (e.key == 'currentUser') {
+                    const userData = e.newValue ? JSON.parse(e.newValue) : null;
+                    this.updateUserInfo(userData);
+                }
+            },
+            updateUserInfo(user) {
+                console.log('update UserInfo called with:', user);
+
+                // every AppHeader component reload user info
+                if(user) {
+                    // if changing user successfully
+                    this.nickname = user.nickname;
+                    this.avatar = user.avatar;
+                    this.isLogin = true;
+                    // get unread msg
+                    this.getUnreadTotal();
+                    this.getUnreadMessageTotal();
+                } else {
+                    // default
+                    this.nickname = '登录';
+                    this.avatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+                    this.isLogin = false;
+                    this.unreadTotal = 0;
+                    this.unreadMessageTotal = 0;
+                }
+            },
             searchIdle() {
                 if ('/search' !== this.$route.path) {
                     this.$router.push({path: '/search', query: {searchValue: this.searchValue}});
@@ -138,7 +187,7 @@
                 this.$api.logout().then(res=>{
                     if(res.status_code===200){
                         this.$globalData.userInfo={};
-                        //this.$webSocket.close();
+                        localStorage.removeItem('currentUser'); // remove localStorage
                         console.log("login out");
                         this.$webSocket.closeWebSocket();
                         if ('/index' === this.$route.path) {
