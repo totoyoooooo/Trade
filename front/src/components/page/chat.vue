@@ -73,8 +73,6 @@
 </template>
 
 <script>
-import { data } from 'jquery';
-
 
 export default {
   name: 'Chat',
@@ -154,7 +152,6 @@ export default {
           this.otherUser = res.data.otherUser;
           this.chatId = res.data.chatId;
           this.messages = res.data.messages;
-          console.log(this.messages);
           this.$nextTick(() => {
             this.scrollToBottom();
           });
@@ -299,12 +296,21 @@ export default {
     this.$bus.$on('new-message', (msg) => {
       this.getChatList();
       if (msg.chat_id === this.chatId && this.otherUser) {
+        this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
         this.selectChat(this.selectedChat);
       }
     });
     this.$bus.$on('revoke-message', (msg) => {
       this.getChatList();
       if (msg.chat_id === this.chatId && this.otherUser) {
+        this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
+        this.selectChat(this.selectedChat);
+      }
+    });
+    this.$bus.$on('online', (msg) => {
+      this.getChatList();
+      if(this.selectedChat != null){
+        this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
         this.selectChat(this.selectedChat);
       }
     });
@@ -312,6 +318,7 @@ export default {
   beforeDestroy() {
     this.$bus.$off('new-message');
     this.$bus.$off('revoke-message');
+    this.$bus.$off('online');
   },
 };
 </script>
