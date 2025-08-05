@@ -2,6 +2,7 @@ package com.second.hand.trading.server.controller;
 
 import com.second.hand.trading.server.enums.ErrorMsg;
 import com.second.hand.trading.server.model.OrderModel;
+import com.second.hand.trading.server.service.IdleItemService;
 import com.second.hand.trading.server.service.OrderService;
 import com.second.hand.trading.server.utils.IdFactoryUtil;
 import com.second.hand.trading.server.utils.OrderTaskHandler;
@@ -19,6 +20,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private IdleItemService idleItemService;
 
     @PostMapping("/add")
     public ResultVo addOrder(@CookieValue("shUserId")
@@ -45,6 +49,7 @@ public class OrderController {
                                  @NotEmpty(message = "登录异常 请重新登录") String shUserId,
                                  @RequestParam Long id){
         OrderModel orderModel=orderService.getOrder(id);
+        orderModel.setIdleItem(idleItemService.getIdleItem(orderModel.getIdleId()));
         if(orderModel.getUserId().equals(Long.valueOf(shUserId))||
                 orderModel.getIdleItem().getUserId().equals(Long.valueOf(shUserId))){
             return ResultVo.success(orderModel);

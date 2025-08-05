@@ -49,6 +49,11 @@
                             </template>
                         </el-table-column>
                     </el-table>
+                    <!-- 添加底部操作按钮 -->
+                    <div slot="footer" class="dialog-footer" style="text-align: center;">
+                        <el-button @click="addressDialogVisible = false">取消</el-button>
+                        <el-button type="primary" @click="toMe">去个人中心添加地址</el-button>
+                    </div>
                 </el-dialog>
                 <div class="order-info-container">
                     <div class="order-info-title">订单信息（{{orderStatus[orderInfo.orderStatus]}}）：</div>
@@ -179,6 +184,12 @@
             })
         },
         methods: {
+            toMe() {
+                // 关闭弹窗
+                this.addressDialogVisible = false;
+                // 跳转到个人中心页面
+                this.$router.push('/me?editAddress=true');
+            },
             getCookie(cname){
                 var name = cname + "=";
                 var ca = document.cookie.split(';');
