@@ -66,7 +66,8 @@
                                     layout="prev, pager, next"
                                     :total="allTags.length"
                                     :page-size="pageSize"
-                                    v-model:current-page="currentPage"
+                                    :current-page="currentPage"
+                                    @current-change="handlePageChange"
                                     class="tag-pagination"
                                     @mousedown.prevent
                                 ></el-pagination>
@@ -515,6 +516,10 @@
                 if (this.showTagPopover && this.tagViewMode === 'suggestions' && this.tagSuggestions[this.highlightedIdx]) {
                     this.selectTagSuggestion(this.tagSuggestions[this.highlightedIdx]);
                 }
+            },
+            // 处理分页变化
+            handlePageChange(page) {
+                this.currentPage = page;
             },
         }
     }
