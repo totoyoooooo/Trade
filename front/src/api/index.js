@@ -325,6 +325,13 @@ const api = {
             params: query
         });
     },
+    addAndGetChat(query) {
+        return request({
+            url: '/chat/addAndGetChat',
+            method: 'post',
+            data: query
+        });
+    },
     getChatList(query) {
         return request({
             url: '/chat/getChatList',

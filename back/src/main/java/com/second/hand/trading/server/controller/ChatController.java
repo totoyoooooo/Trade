@@ -28,6 +28,15 @@ public class ChatController {
     @Autowired
     private ChatMessageService chatMessageService;
 
+    @PostMapping("addAndGetChat")
+    public ResultVo addAndGetChat(@RequestBody ChatModel chatModel) {
+        if(chatService.getChatById(chatModel.getId()) == null){
+            chatService.createChat(chatModel);
+            chatModel = chatService.getChatById(chatModel.getId());
+        }
+        return ResultVo.success(chatModel);
+    }
+
     @PostMapping("getChatList")
     public ResultVo getChatList(@RequestParam Long userId,@RequestParam Long type) {
         List<ChatModel> chatList = chatService.getChatList(userId);
@@ -40,13 +49,16 @@ public class ChatController {
                 chatModel.setName(userModel.getNickname());
                 chatModel.setAvatar(userModel.getAvatar());
                 List<ChatMessageModel> message = getMessage(chatModel.getId());
-                if(!message.isEmpty()){
-                    Long unreadCount = 0L;
+                //删除撤回的消息
+                if(!message.isEmpty()) {
                     List<ChatMessageModel> remove = new ArrayList<>();
-                    for(ChatMessageModel chatMessageModel : message){
-                        if(chatMessageModel.getHas_revoke() == 1) remove.add(chatMessageModel);
+                    for (ChatMessageModel chatMessageModel : message) {
+                        if (chatMessageModel.getHas_revoke() == 1) remove.add(chatMessageModel);
                     }
                     message.removeAll(remove);
+                }
+                if(!message.isEmpty()){
+                    Long unreadCount = 0L;
                     for(ChatMessageModel chatMessageModel : message){
                         if(!chatMessageModel.getSender_id().equals(userId) && chatMessageModel.getHas_read() == 0) unreadCount++;
                     }
@@ -85,10 +97,6 @@ public class ChatController {
 
     @PostMapping("openChat")
     public ResultVo openChat(@RequestBody ChatModel chatModel) {
-        if(chatService.getChatById(chatModel.getId()) == null){
-            chatService.createChat(chatModel);
-            chatModel = chatService.getChatById(chatModel.getId());
-        }
         List<ChatMessageModel> chatMessageModelList = getMessage(chatModel.getId());
         List<ChatMessageModel> remove = new ArrayList<>();
         for(ChatMessageModel chatMessageModel : chatMessageModelList){

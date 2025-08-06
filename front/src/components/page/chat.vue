@@ -105,9 +105,11 @@ export default {
       return;
     } else {
       if (this.$route.query.id) {
-        this.getNewChatList().then(() => {
-          if (this.chatList.length > 0) {
-            this.selectChat(this.chatList[0]);
+        this.addAndGetChat(this.$route.query.id).then(res => {
+          if(res.status_code == 200) {
+            this.getChatList().then(res => {
+              if(res.status_code == 200) this.selectChat(this.chatList[0]);
+            });
           }
         });
       } else {
@@ -116,27 +118,33 @@ export default {
     }
   },
   methods: {
-    getNewChatList() {
-      return this.$api.getChatList(
-        "userId=" + this.getCookie('shUserId') + "&type=" + this.$route.query.id
-      ).then(res => {
-        if (res.status_code == 200) {
-          this.chatList = res.data;
-        }
-      }).catch(error => {
-        console.error(error);
+    addAndGetChat(userId){
+      var user1Id = userId < this.getCookie('shUserId') ? userId : this.getCookie('shUserId');
+      var user2Id = userId < this.getCookie('shUserId') ? this.getCookie('shUserId') : userId;
+      return this.$api.addAndGetChat({
+        id: user1Id + "" + user2Id,
+        user1_id: user1Id,
+        user2_id: user2Id,
       });
     },
     getChatList() {
-      return this.$api.getChatList(
-        "userId=" + this.getCookie('shUserId') + "&type=-1"
-      ).then(res => {
-        if (res.status_code == 200) {
-          this.chatList = res.data;
-        }
-      }).catch(error => {
-        console.error(error);
+      var ans;
+      if(this.$route.query.id){
+        ans = this.$api.getChatList(
+          "userId=" + this.getCookie('shUserId') + "&type=" + this.$route.query.id
+        )
+      }else{
+        ans = this.$api.getChatList(
+          "userId=" + this.getCookie('shUserId') + "&type=-1"
+        )
+      }
+      ans.then(res => {
+        if(res.status_code == 200) this.chatList = res.data;
       });
+      if(this.chatList.length == 0){
+        this.selectChat(null);
+      }
+      return ans;
     },
     openChat(userId) {
       var user1Id = userId < this.getCookie('shUserId') ? userId : this.getCookie('shUserId');
@@ -159,18 +167,10 @@ export default {
             "chat_id=" + this.chatId + "&sender_id=" + this.getCookie('shUserId')
           ).then(res => {
             if (res.status_code == 200) {
-              if (this.$route.query.id) {
-                this.getNewChatList();
-              } else {
                 this.getChatList();
-              }
             }
-          }).catch(error => {
-            console.error(error);
           });
         }
-      }).catch(error => {
-
       });
     },
     getCookie(cname) {
@@ -207,11 +207,7 @@ export default {
               this.scrollToBottom();
             });
           }
-        }
-        ).catch(
-
-        );
-
+        });
       }
     },
     selectChat(chat) {
@@ -272,6 +268,7 @@ export default {
         if (res.status_code === 200) {
           this.$message.success('消息已撤回');
           this.getChatList();
+          this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
           this.selectChat(this.selectedChat);
           this.$webSocket.sendMessage({
             target: this.otherUser.id,
