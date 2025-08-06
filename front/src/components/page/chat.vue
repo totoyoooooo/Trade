@@ -108,6 +108,7 @@ export default {
         this.addAndGetChat(this.$route.query.id).then(res => {
           if(res.status_code == 200) {
             this.getChatList().then(res => {
+            console.log(res.data);
               if(res.status_code == 200) this.selectChat(this.chatList[0]);
             });
           }
@@ -212,9 +213,11 @@ export default {
     },
     selectChat(chat) {
       this.selectedChat = chat;
-      if (chat.otherId !== undefined && chat.otherId !== null) {
-        this.chatId = chat.id;
-        this.openChat(chat.otherId);
+      if(chat != null){
+        if (chat.otherId !== undefined && chat.otherId !== null) {
+          this.chatId = chat.id;
+          this.openChat(chat.otherId);
+        }
       }
     },
     getNowTime() {
