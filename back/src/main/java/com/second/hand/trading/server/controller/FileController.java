@@ -18,7 +18,8 @@ import java.io.OutputStream;
 @RestController
 public class FileController {
 
-    private String userFilePath = new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath() + "\\pic";
+    private  String userFilePath = "D:\\WorkSpace\\progamme\\Codefield\\Project_Vue\\Trade\\pic";
+//    private String userFilePath = new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath() + "\\pic";
 
     @Value("${baseUrl}")
     private String baseUrl;
