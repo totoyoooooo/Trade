@@ -381,7 +381,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: 0px 16px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     min-height: 50px;
@@ -464,7 +464,8 @@ export default {
 
 .message-content {
     max-width: 85%;
-    padding: 12px 16px;
+    min-height: 23px;
+    padding: 1px 16px;
     border-radius: 18px;
     word-wrap: break-word;
 }
@@ -490,7 +491,7 @@ export default {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-top: 8px;
+    margin-bottom: 10px;
 }
 
 /* 商品卡片 */
@@ -595,7 +596,7 @@ export default {
 
 /* 输入区域 */
 .input-area {
-    padding: 16px;
+    padding: 10px;
     border-top: 1px solid #e1e5e9;
     background: white;
 }

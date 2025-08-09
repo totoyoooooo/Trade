@@ -6,7 +6,13 @@
 pip install -r requirements.txt
 ```
 
+- `mcp`：MCP协议支持
+- `mysql-connector-python`：数据库连接
+
 ### 数据库配置
+
+**确保MySQL服务已经打开**
+
 在MCP服务器(mcp_shopping_server.py)中修改数据库连接：
 ```python
 # 在 mcp_shopping_server.py 中修改
@@ -22,12 +28,13 @@ self.db_config = {
 ```
 
 ## 相关测试
-
+### 测试MCP服务器是否正常
+运行下面语句
 ```bash
 python mcp_shopping_server.py
 ```
 
-在终端输入MCP服务器的JSON-RPC语句，在back/mcp_shopping_server.log中相应查看输出，查看MCP服务器是否正常
+在终端输入MCP服务器的JSON-RPC语句，**注意！**需要在[back/mcp_shopping_server.log](../../../mcp_shopping_server.log) 日志文件中相应查看输出，确认MCP服务器是否正常
 
 ### 1. 初始化连接
 
