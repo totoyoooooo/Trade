@@ -94,6 +94,24 @@ public class AIAgentServiceImpl implements AIAgentService {
         return mcpReady.get();
     }
 
+    /**
+     * 在沟通过程中采用基本格式为
+     * "messages":[{
+     *     "role": "system | user | assistant | tool",
+     *     "content": "",
+     *     "tool_calls": ""
+     * }]
+     *  - system    表示系统提示
+     *  - user      表示用户消息
+     *  - assistant 表示回复消息
+     *  - tool      表示工具调用
+     *
+     *
+     * @param sessionId 会话ID唯一标识每一次会话
+     * @param userMessage 用户当前发送的消息
+     * @param userId
+     * @return
+     */
     @Override
     public ChatResponseVo chatWithAgent(String sessionId, String userMessage, Long userId) {
         try {
@@ -126,7 +144,7 @@ public class AIAgentServiceImpl implements AIAgentService {
 
             // 调用支持工具的LLM
             String reply = callLLMWithTools(messages);
-            log.info("llm's reply: {}", reply);
+            log.info("After MCP response, llm's reply: {}", reply);
 
             // 保存历史
             saveSessionMessages(sessionId, messages);
@@ -151,12 +169,29 @@ public class AIAgentServiceImpl implements AIAgentService {
 
 
     /**
-     * 预留流式版本
+     * 流式处理与Agent的聊天。
+     * 这个方法会通过 SSE (Server-Sent Events) 将数据流式传输给客户端。
+     *
+     * @param sessionId   会话ID
+     * @param userMessage 用户消息
+     * @param userId      用户ID
+     * @param out         HTTP响应的OutputStream，用于写入SSE数据
      */
     public void chatWithAgentStream(String sessionId, String userMessage, Long userId, OutputStream out) {
         List<Map<String, Object>> messages = getSessionMessages(sessionId);
         if (messages.isEmpty()) {
             messages.add(Map.of("role", "system", "content", buildSystemPrompt()));
+            // 构建用户消息
+            String userContent = String.format("""
+                用户消息: %s
+                用户ID: %s
+
+                请根据用户需求，主动使用合适的智能工具查询商品信息，然后给出专业的购买建议。
+                优先使用 smart_search 进行智能搜索，它支持模糊匹配和相关度排序。
+                在回答中如果要推荐具体商品，请使用格式：[商品名称](商品ID)，默认ID为0，此格式会自动渲染为商品卡片
+
+                """, userMessage, userId);
+            messages.add(Map.of("role", "user", "content", userContent));
         }
         appendMessage(messages, "user",
                 String.format("用户消息: %s\n用户ID: %s", userMessage, userId));
@@ -236,7 +271,9 @@ public class AIAgentServiceImpl implements AIAgentService {
 
                 // 可以在开始前先剪切一部分token，（未测试过）
                 // trimMessages(messages);
+
                 // 构建请求
+                // 其中 tools 用以告诉AI可以使用的工具
                 Map<String, Object> request = Map.of(
                         "model", modelName,
                         "messages", messages,
@@ -245,9 +282,11 @@ public class AIAgentServiceImpl implements AIAgentService {
                         "max_tokens", 4000,
                         "temperature", 0.1
                 );
+                // DEBUG
+                // log.info("Step{} - AI Agent Request: {}", step, request);
                 // 调用API
                 String responseJson = callLLMAPI(request);
-                log.info("AI Agent Response: {}", responseJson);
+                log.info("Step{} - AI Agent Response: {}", step, responseJson);
                 JsonNode root = objectMapper.readTree(responseJson);
                 JsonNode choice = root.get("choices").get(0);
                 JsonNode message = choice.get("message");

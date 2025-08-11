@@ -429,6 +429,14 @@ const api = {
             method: 'get',
             params: query
         });
+    },
+    callShoppingAIAgent(data) {
+        return request({
+            url: '/ai-agent/chat',
+            method: 'post',
+            data,
+            timeout: 60000
+        })
     }
 };
 

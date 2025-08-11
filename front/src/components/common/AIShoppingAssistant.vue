@@ -266,25 +266,24 @@ export default {
             this.isLoading = true
             this.$nextTick(this.scrollToBottom)
 
-            try {
-                const response = await axios.post('/api/ai-agent/chat', {
-                    sessionId: this.sessionId,
-                    message: userMessage,
-                    userId: this.userId
-                }, { timeout: 30000 })
-
+            this.$api.callShoppingAIAgent({
+                sessionId: this.sessionId,
+                message: userMessage,
+                userId: this.userId
+            }).then( response => {
+                console.log(response)
                 if (!response.data || typeof response.data !== 'object') {
                     throw new Error('响应格式错误')
                 }
-                const responseData = response.data.data || response.data
-                const { cleanedMessage, productCardsForMessage } = this.processAIResponse(responseData)
+                const reponseData = response.data.data || response.data
+                const { cleanedMessage, productCardsForMessage } = this.processAIResponse(reponseData)
                 this.messages.push({
                     text: cleanedMessage || '收到响应，但内容为空',
-                    isUser: false,
+                    inUser: false,
                     timestamp: new Date(),
                     productCards: this.processProductsForCard(productCardsForMessage)
                 })
-            } catch (error) {
+            }).catch (error => {
                 console.error('发送消息失败:', error)
                 let errorMessage = '抱歉，我暂时无法回答您的问题，请稍后再试。'
                 if (error.response) {
@@ -297,10 +296,10 @@ export default {
                     errorMessage = '请求超时，请稍后再试。'
                 }
                 this.messages.push({ text: errorMessage, isUser: false, timestamp: new Date(), productCards: null })
-            } finally {
+            }).finally(() => {
                 this.isLoading = false
                 this.$nextTick(this.scrollToBottom)
-            }
+            })
         },
         handlePurchase(product) {
             console.log('查看商品详情:', product)
@@ -317,7 +316,15 @@ export default {
             return time.toLocaleDateString()
         },
         formatMessage(text) {
-            return text.replace(/\n/g, '<br>')
+            if (!text) return '';
+            let formattedText = text;
+
+            // 将 Markdown 的 **text** 转换为 <strong>text</strong>
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // 将换行符 \n 转换为 <br>
+            formattedText = formattedText.replace(/\n/g, '<br>');
+
+            return formattedText
         }
     }
 }

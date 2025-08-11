@@ -35,7 +35,7 @@ ai.model.model-name=qwen2.5-72b-instruct
 
 # 方式2: 使用DeepSeek
 # ai.model.api-key=${API_KEY}
-# ai.model.base-url=https://api.deepseek.com
+# ai.model.base-url=https://dashscope.aliyuncs.com/compatible-mode
 # ai.model.model-name=deepseek-r1
 
 # 方式3: 使用本地Ollama
