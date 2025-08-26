@@ -4,7 +4,7 @@
             <!-- Logo和品牌区域 -->
             <div class="app-name">
                 <div class="logo-container">
-                    <img src="image/miku.jpg" alt="" class="logo-image">
+                    <img src="/miku.jpg" alt="" class="logo-image">
                     <router-link to="/" class="brand-link">
                         <span class="brand-text">校园二手物品交易平台</span>
                     </router-link>
@@ -29,6 +29,9 @@
             <div class="action-buttons">
                 <el-button class="modern-btn modern-btn-release" icon="el-icon-plus" @click="toRelease">
                     <span>物品发布</span>
+                </el-button>
+                <el-button class="modern-btn modern-btn-wanted" icon="el-icon-search" @click="toWantedItemList">
+                    <span>求购</span>
                 </el-button>
                 
                 <el-badge :value="unreadTotal" :hidden="!unreadTotal" class="notification-badge">
@@ -110,24 +113,41 @@
         },
         created(){
             // console.log("header");
-            if(!this.$globalData.userInfo.nickname){
-                this.$api.getUserInfo().then(res=>{
+            // 无论从哪里来，都尝试从 cookie 中获取用户ID，并用它来拉取最新的用户数据
+            const userIdFromCookie = this.getCookie('shUserId');
+            if (userIdFromCookie) {
+                this.$api.getUserInfo({ id: userIdFromCookie }).then(res => {
                     console.log('Header getUserInfo:',res);
-                    if(res.status_code===200){
+                    if(res.status_code===200 && res.data){
+                        res.data.signInTime=res.data.signInTime.substring(0,10);
+                        this.$store.commit('setUserInfo', res.data); // 更新Vuex store
                         this.nickname=res.data.nickname;
                         this.avatar=res.data.avatar;
-                        res.data.signInTime=res.data.signInTime.substring(0,10);
-                        this.$globalData.userInfo=res.data;
                         this.isLogin=true;
                         this.$webSocket.init("ws://localhost:8080/websocket/" + res.data.id);
+                    } else {
+                        // 如果 cookie 有，但后端返回失败，可能cookie失效，清空Vuex状态并重置登录状态
+                        this.$store.commit('setUserInfo', {});
+                        this.isLogin = false;
+                        // 移除失效的 cookie，如果需要
+                        document.cookie = "shUserId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                     }
-                })
-            }else {
-                this.nickname=this.$globalData.userInfo.nickname;
-                this.avatar=this.$globalData.userInfo.avatar;
-                this.isLogin=true;
-                this.$webSocket.init("ws://localhost:8080/websocket/" + this.$globalData.userInfo.id);
+                }).catch(err => {
+                    console.error('获取用户信息失败:', err);
+                    this.$store.commit('setUserInfo', {});
+                    this.isLogin = false;
+                    document.cookie = "shUserId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                });
+            } else if (this.$store.state.userInfo && this.$store.state.userInfo.id) {
+                // 如果 cookie 没有，但 Vuex store 中有，也使用 Vuex 的信息
+                this.nickname = this.$store.state.userInfo.nickname;
+                this.avatar = this.$store.state.userInfo.avatar;
+                this.isLogin = true;
+                this.$webSocket.init("ws://localhost:8080/websocket/" + this.$store.state.userInfo.id);
+            } else {
+                this.isLogin = false; // 确保在没有用户信息时显示未登录状态
             }
+            console.log('AppHeader created() - Final isLogin state:', this.isLogin, 'userIdFromCookie:', userIdFromCookie);
         },
         methods: {
             searchIdle() {
@@ -140,13 +160,21 @@
 
             },
             getUnreadTotal() {
-                this.$api.getChatList("userId=" + this.getCookie('shUserId') + "&type=-1").then(res => {
+                // 从Vuex获取userId
+                const userId = this.$store.state.userInfo.id;
+                if (!userId) return;
+
+                this.$api.getChatList("userId=" + userId + "&type=-1").then(res => {
                 if (res.status_code === 200) {
                     this.unreadTotal = res.data.reduce((sum, chat) => sum + (chat.unread || 0), 0);
                 }});
             },
             getUnreadMessageTotal() {
-                this.$api.getAllMyMessage().then(res => {
+                // 从Vuex获取userId
+                const userId = this.$store.state.userInfo.id;
+                if (!userId) return;
+
+                this.$api.getAllMyMessage({ userId: userId }).then(res => {
                     if (res.status_code === 200) {
                         this.unreadMessageTotal = res.data.filter(msg => !msg.has_read).length;
                     }
@@ -172,6 +200,11 @@
                     this.$router.push({path: '/release'});
                 }
             },
+            toWantedItemList() {
+                if ('/wanteditemlist' !== this.$route.path) {
+                    this.$router.push({path: '/wanteditemlist'});
+                }
+            },
             getCookie(cname){
                 var name = cname + "=";
                 var ca = document.cookie.split(';');
@@ -184,7 +217,9 @@
             loginOut(){
                 this.$api.logout().then(res=>{
                     if(res.status_code===200){
-                        this.$globalData.userInfo={};
+                        this.$store.commit('setUserInfo', {}); // 清空Vuex store中的用户信息
+                        // 同时清空 cookie
+                        document.cookie = "shUserId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                         console.log("login out");
                         if ('/index' === this.$route.path) {
                             this.$router.go(0);

@@ -143,7 +143,7 @@ import { webSocket } from '@/api';
                     if (res.status_code === 200) {
                         res.data.signInTime=res.data.signInTime.substring(0,10);
                         this.$webSocket.init("ws://localhost:8080/websocket/" + res.data.id);
-                        this.$globalData.userInfo = res.data;
+                        this.$store.commit('setUserInfo', res.data); // 将用户信息保存到Vuex store
                         this.$router.replace({path: '/index'});
                     } else if(res.status_code === 400) {
                         //密码错误，提示用户

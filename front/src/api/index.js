@@ -247,6 +247,40 @@ const api = {
             params: query
         });
     },
+    // Wanted Item APIs
+    addWantedItem(data) {
+        return request({
+            url: '/wantedItem',
+            method: 'post',
+            data: data
+        });
+    },
+    getWantedItemList(query) {
+        return request({
+            url: '/wantedItem',
+            method: 'get',
+            params: query
+        });
+    },
+    getWantedItemById(id) {
+        return request({
+            url: `/wantedItem/${id}`,
+            method: 'get'
+        });
+    },
+    updateWantedItem(data) {
+        return request({
+            url: '/wantedItem',
+            method: 'put',
+            data: data
+        });
+    },
+    deleteWantedItem(id) {
+        return request({
+            url: `/wantedItem/${id}`,
+            method: 'delete'
+        });
+    },
     getGoods(query) {
         return request({
             url: '/admin/idleList',
@@ -322,7 +356,7 @@ const api = {
         return request({
             url: '/chat/getChatList',
             method: 'post',
-            data: query
+            params: query
         });
     },
     openChat(query) {
@@ -343,14 +377,14 @@ const api = {
         return request({
             url: '/chat/clearUnread',
             method: 'post',
-            data: query
+            params: query
         });
     },
     clearMessageUnread(query) {
         return request({
             url: '/message/clearUnread',
             method: 'post',
-            data: query
+            params: query
         });
     },
 };

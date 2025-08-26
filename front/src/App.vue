@@ -4,6 +4,16 @@
     </div>
 </template>
 
+<script>
+// 如果App.vue不需要直接渲染AppHeader，则无需导入它
+// import AppHeader from './components/common/AppHeader.vue'; 
+
+export default {
+    name: 'App',
+    // components: { AppHeader } // 如果不需要直接渲染AppHeader，则无需定义
+};
+</script>
+
 <style>
 @import url('./assets/styles/modern-design.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');

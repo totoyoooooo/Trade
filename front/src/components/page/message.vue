@@ -49,11 +49,32 @@
             };
         },
         created(){
-            this.$api.clearMessageUnread(
-                "id=" + this.getCookie("shUserId")
-            ).then(res=>{
-                this.$bus.$emit('new-leave-message');
-                this.$api.getAllMyMessage().then(res=>{
+            console.log('message.vue created() hook triggered.');
+            const userId = this.getCookie("shUserId");
+            console.log('Current userId from cookie:', userId);
+            if (userId) {
+                this.$api.clearMessageUnread({ id: Number(userId) })
+                    .then(res=>{
+                        console.log('clearMessageUnread response:', res);
+                        if (res.status_code === 200) {
+                            this.$bus.$emit('new-leave-message');
+                            this.fetchMyMessages(Number(userId)); // Pass userId to fetch messages
+                        } else {
+                            this.$message.error('清除未读消息失败');
+                        }
+                    }).catch(err => {
+                        console.error("清除未读消息请求失败", err);
+                        this.$message.error('清除未读消息请求失败');
+                    });
+            } else {
+                this.$message.error('未登录或登录信息已过期，请重新登录');
+                this.$router.push('/login');
+            }
+        },
+        methods:{
+            fetchMyMessages(userId) {
+                console.log('Fetching my messages with userId:', userId);
+                this.$api.getAllMyMessage({ userId: userId }).then(res=>{
                     console.log(res);
                     if(res.status_code===200){
                         for(let i=0;i<res.data.length;i++){
@@ -73,18 +94,27 @@
                             res.data[i].content = contenHtml;
                         }
                         this.meslist=res.data;
+                    } else {
+                        this.$message.error('获取我的消息失败');
                     }
-                })
-            });
-        },
-        methods:{
+                }).catch(err => {
+                    console.error("获取我的消息请求失败", err);
+                    this.$message.error('获取我的消息请求失败');
+                });
+            },
             getCookie(cname){
+                console.log('Attempting to get cookie:', cname);
                 var name = cname + "=";
                 var ca = document.cookie.split(';');
                 for(var i=0; i<ca.length; i++){
                     var c = ca[i].trim();
-                    if (c.indexOf(name)===0) return c.substring(name.length,c.length);
+                    if (c.indexOf(name)===0) {
+                        const cookieValue = c.substring(name.length,c.length);
+                        console.log('Cookie found:', cname, 'value:', cookieValue);
+                        return cookieValue;
+                    }
                 }
+                console.log('Cookie not found:', cname);
                 return "";
             },
             toDetails(id){

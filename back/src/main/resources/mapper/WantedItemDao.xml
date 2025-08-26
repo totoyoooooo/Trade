@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.second.hand.trading.server.dao.WantedItemDao">
+  <resultMap id="BaseResultMap" type="com.second.hand.trading.server.model.WantedItemModel">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="wanted_name" jdbcType="VARCHAR" property="wantedName" />
+    <result column="wanted_details" jdbcType="VARCHAR" property="wantedDetails" />
+    <result column="max_price" jdbcType="DECIMAL" property="maxPrice" />
+    <result column="wanted_place" jdbcType="VARCHAR" property="wantedPlace" />
+    <result column="wanted_label" jdbcType="INTEGER" property="wantedLabel" />
+    <result column="post_time" jdbcType="TIMESTAMP" property="postTime" />
+    <result column="wanted_status" jdbcType="TINYINT" property="wantedStatus" />
+    <result column="user_id" jdbcType="BIGINT" property="userId" />
+  </resultMap>
+
+  <resultMap id="WantedItemWithUserResultMap" type="com.second.hand.trading.server.model.WantedItemModel" extends="BaseResultMap">
+    <association property="user" javaType="com.second.hand.trading.server.model.UserModel">
+      <id column="u_id" jdbcType="BIGINT" property="id" />
+      <result column="u_nickname" jdbcType="VARCHAR" property="nickname" />
+      <result column="u_avatar" jdbcType="VARCHAR" property="avatar" />
+    </association>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    i.id, i.wanted_name, i.wanted_details, i.max_price, i.wanted_place, i.wanted_label, i.post_time, 
+    i.wanted_status, i.user_id, 
+    u.id as u_id, u.nickname as u_nickname, u.avatar as u_avatar
+  </sql>
+
+  <select id="getWantedItemById" parameterType="java.lang.Long" resultMap="WantedItemWithUserResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from sh_wanted_item i
+    left join sh_user u on i.user_id = u.id
+    where i.id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="getWantedItemList" resultMap="WantedItemWithUserResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from sh_wanted_item i
+    left join sh_user u on i.user_id = u.id
+    <where>
+      <if test="wantedName != null and wantedName != ''">
+        and i.wanted_name like concat('%', #{wantedName}, '%')
+      </if>
+    </where>
+    order by i.post_time desc
+    limit #{offset}, #{limit}
+  </select>
+
+  <select id="countAllWantedItems" resultType="java.lang.Integer">
+    select count(*)
+    from sh_wanted_item i
+    <where>
+      <if test="wantedName != null and wantedName != ''">
+        and i.wanted_name like concat('%', #{wantedName}, '%')
+      </if>
+    </where>
+  </select>
+
+  <insert id="insertWantedItem" parameterType="com.second.hand.trading.server.model.WantedItemModel" useGeneratedKeys="true" keyProperty="id">
+    insert into sh_wanted_item (wanted_name, wanted_details, max_price, wanted_place, 
+      wanted_label, post_time, wanted_status, user_id)
+    values (#{wantedName,jdbcType=VARCHAR}, #{wantedDetails,jdbcType=VARCHAR}, #{maxPrice,jdbcType=DECIMAL}, 
+      #{wantedPlace,jdbcType=VARCHAR}, #{wantedLabel,jdbcType=INTEGER}, #{postTime,jdbcType=TIMESTAMP}, 
+      #{wantedStatus,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT})
+  </insert>
+
+  <update id="updateWantedItem" parameterType="com.second.hand.trading.server.model.WantedItemModel">
+    update sh_wanted_item
+    set wanted_name = #{wantedName,jdbcType=VARCHAR},
+      wanted_details = #{wantedDetails,jdbcType=VARCHAR},
+      max_price = #{maxPrice,jdbcType=DECIMAL},
+      wanted_place = #{wantedPlace,jdbcType=VARCHAR},
+      wanted_label = #{wantedLabel,jdbcType=INTEGER},
+      post_time = #{postTime,jdbcType=TIMESTAMP},
+      wanted_status = #{wantedStatus,jdbcType=TINYINT},
+      user_id = #{userId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteWantedItem" parameterType="java.lang.Long">
+    delete from sh_wanted_item
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+</mapper>

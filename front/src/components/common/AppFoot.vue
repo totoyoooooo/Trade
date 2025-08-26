@@ -47,11 +47,11 @@
                 <h4>联系方式</h4>
                 <div class="contact-item">
                     <i class="el-icon-phone"></i>
-                    <span>客服热线: 400-123-4567</span>
+                    <span>客服热线: 114-514-1919</span>
                 </div>
                 <div class="contact-item">
                     <i class="el-icon-message"></i>
-                    <span>邮箱: support@campus-trade.com</span>
+                    <span>邮箱: 2022@hunnu.edu.cn</span>
                 </div>
                 <div class="social-links">
                     <a href="#" class="social-link">
