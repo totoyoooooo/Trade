@@ -18,7 +18,7 @@ import java.io.OutputStream;
 @RestController
 public class FileController {
 
-    private String userFilePath = new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath() + File.separator + "pic";
+    private String userFilePath = System.getProperty("user.dir") + File.separator + "pic";
 
     @Value("${baseUrl}")
     private String baseUrl;
