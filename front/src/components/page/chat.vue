@@ -154,7 +154,7 @@ export default {
         id: user1Id + "" + user2Id,
         user1_id: user1Id,
         user2_id: user2Id,
-        getterId: this.getCookie('shUserId')
+        getterId: Number(this.getCookie('shUserId'))
       }).then(res => {
         if (res.status_code == 200) {
           this.myUser = res.data.myUser;
@@ -165,12 +165,14 @@ export default {
             this.scrollToBottom();
           });
           this.$api.clearUnread(
-            "chat_id=" + this.chatId + "&sender_id=" + this.getCookie('shUserId')
+            { chat_id: this.chatId, sender_id: Number(this.getCookie('shUserId')) }
           ).then(res => {
             if (res.status_code == 200) {
                 this.getChatList();
             }
           });
+        } else {
+          this.$message.error('打开聊天失败');
         }
       });
     },
@@ -188,10 +190,11 @@ export default {
         const newMessage = {
           chat_id: this.chatId,
           content: this.inputText,
-          sender_id: this.getCookie('shUserId'),
+          sender_id: Number(this.getCookie('shUserId')),
           send_time: this.getNowTime(),
         };
         this.inputText = '';
+        console.log('Sending message:', newMessage);
         this.$api.sendChatMessage(newMessage).then(res => {
           if (res.status_code == 200) {
             this.$webSocket.sendMessage({
@@ -212,6 +215,7 @@ export default {
       }
     },
     selectChat(chat) {
+      console.log('Selected chat:', chat);
       this.selectedChat = chat;
       if(chat != null){
         if (chat.otherId !== undefined && chat.otherId !== null) {
@@ -292,9 +296,16 @@ export default {
     },
   },
   mounted() {
-    this.$webSocket.init("ws://localhost:8080/websocket/" + this.getCookie('shUserId'));
+    console.log('chat.vue mounted() hook triggered.');
+    const userIdForWs = this.getCookie('shUserId');
+    if (userIdForWs) {
+      this.$webSocket.init("ws://localhost:8080/websocket/" + Number(userIdForWs));
+    } else {
+      console.error('WebSocket initialization failed: userId not found.');
+    }
     this.$bus.$on('new-message', (msg) => {
-      this.getChatList();
+      console.log('Received new-message event:', msg);
+      this.getChatList(Number(this.getCookie('shUserId'))); // Refresh chat list on new message
       if (msg.chat_id === this.chatId && this.otherUser) {
         this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
         this.selectChat(this.selectedChat);

@@ -7,6 +7,7 @@ import com.second.hand.trading.server.service.ChatMessageService;
 import com.second.hand.trading.server.service.ChatService;
 import com.second.hand.trading.server.service.UserService;
 import com.second.hand.trading.server.vo.ResultVo;
+import com.second.hand.trading.server.enums.ErrorMsg;
 import com.second.hand.trading.server.websocket.WebSocketServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,8 @@ public class ChatController {
     @PostMapping("getChatList")
     public ResultVo getChatList(@RequestParam Long userId,@RequestParam Long type) {
         List<ChatModel> chatList = chatService.getChatList(userId);
+        List<ChatModel> resultList = new ArrayList<>(); // 使用一个新的列表来构建结果
+
         if(!chatList.isEmpty()){
             List<ChatModel> toRemove = new ArrayList<>();
             for(ChatModel chatModel : chatList){
@@ -65,18 +68,49 @@ public class ChatController {
                     chatModel.setUnread(unreadCount);
                     chatModel.setLastMessage(message.get(message.size() - 1).getContent());
                     chatModel.setTimestamp(message.get(message.size() - 1).getSend_time());
+                    resultList.add(chatModel); // 有消息的直接加入结果列表
                 }else{
-                    if(type == -1){
-                        toRemove.add(chatModel);
-                    }else{
-                        if(!chatModel.getUser1_id().equals(type) && !chatModel.getUser2_id().equals(type)){
-                            toRemove.add(chatModel);
+                    // 如果消息列表为空
+                    if(type != -1){ // 如果type不是-1 (即type是某个用户ID，表示创建新聊天)
+                        // 如果当前聊天是与type用户的新聊天（但没有消息），则添加到结果列表
+                        if ((chatModel.getUser1_id().equals(userId) && chatModel.getUser2_id().equals(type)) || 
+                            (chatModel.getUser2_id().equals(userId) && chatModel.getUser1_id().equals(type))) {
+                            resultList.add(chatModel);
                         }
-                    }
+                    } 
+                    // type == -1，且消息列表为空的聊天，不显示，不加入resultList
                 }
             }
-            if(!toRemove.isEmpty()) chatList.removeAll(toRemove);
-            chatList.sort((p1, p2) -> {
+        }
+
+        // 如果经过上述处理后resultList仍然为空，且type不是-1，则尝试创建一个新的聊天模型
+        if (resultList.isEmpty() && type != -1) {
+            ChatModel newChatModel = new ChatModel();
+            Long user1 = userId < type ? userId : type;
+            Long user2 = userId < type ? type : userId;
+            newChatModel.setId(user1 + "" + user2);
+            newChatModel.setUser1_id(user1);
+            newChatModel.setUser2_id(user2);
+            newChatModel.setGetterId(userId);
+            // 填充otherUser信息
+            UserModel otherUserModel = userService.getUser(type);
+            if (otherUserModel != null) {
+                newChatModel.setOtherId(type);
+                newChatModel.setName(otherUserModel.getNickname());
+                newChatModel.setAvatar(otherUserModel.getAvatar());
+                newChatModel.setStatus(WebSocketServer.isOnline(otherUserModel.getId()) ? "在线" : "离线");
+            } else {
+                // 如果 otherUserModel 为空，返回错误，因为无法创建有效聊天
+                return ResultVo.fail(ErrorMsg.ACCOUNT_NOT_EXIT); 
+            }
+            newChatModel.setUnread(0L);
+            newChatModel.setLastMessage("");
+            newChatModel.setTimestamp("");
+            resultList.add(newChatModel);
+        }
+
+        if (!resultList.isEmpty()) {
+            resultList.sort((p1, p2) -> {
                 String timestamp1 = p1.getTimestamp();
                 String timestamp2 = p2.getTimestamp();
 
@@ -90,9 +124,10 @@ public class ChatController {
                     return timestamp2.compareTo(timestamp1);
                 }
             });
-            return ResultVo.success(chatList);
+            return ResultVo.success(resultList);
         }
-        return ResultVo.fail();
+        // 只有当resultList为空且type==-1时才返回失败（即没有历史聊天，也不是创建新聊天）
+        return ResultVo.fail(ErrorMsg.SYSTEM_ERROR);
     }
 
     @PostMapping("openChat")
@@ -125,7 +160,7 @@ public class ChatController {
             chatMessageModel.setAvatar(userService.getUser(chatMessageModel.getSender_id()).getAvatar());
             return ResultVo.success(chatMessageModel);
         }
-        return ResultVo.fail();
+        return ResultVo.fail(ErrorMsg.COMMIT_FAIL_ERROR);
     }
 
     private List<ChatMessageModel> getMessage(String chatId){

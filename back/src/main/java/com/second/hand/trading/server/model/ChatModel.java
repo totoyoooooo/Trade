@@ -39,6 +39,10 @@ public class ChatModel {
     }
 
     public void setTimestamp(String timestamp) {
+        if (timestamp == null || timestamp.isEmpty()) {
+            this.timestamp = "";
+            return;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDate sendDate = LocalDate.parse(timestamp,formatter);
         LocalDate nowDate = LocalDate.now();
