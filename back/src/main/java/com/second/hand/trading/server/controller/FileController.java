@@ -18,7 +18,7 @@ import java.io.OutputStream;
 @RestController
 public class FileController {
 
-    private String userFilePath = System.getProperty("user.dir") + File.separator + "pic";
+    private String userFilePath = new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath() + File.separator + "pic";
 
     @Value("${baseUrl}")
     private String baseUrl;
@@ -27,12 +27,12 @@ public class FileController {
     private FileService fileService;
 
     @PostMapping("/file")
-    public ResultVo uploadFile(@RequestParam("file") MultipartFile multipartFile) {
+    public ResultVo<String> uploadFile(@RequestParam("file") MultipartFile multipartFile) {
         String uuid="file"+ IdFactoryUtil.getFileId();
         String fileName= uuid + multipartFile.getOriginalFilename();
         try {
-            if (fileService.uploadFile(multipartFile,fileName)) {
-                return ResultVo.success(baseUrl+"/image?imageName="+fileName);
+            if (fileService.uploadFile(multipartFile, fileName)) {
+                return ResultVo.success(baseUrl + "/image?imageName=" + fileName);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -45,7 +45,13 @@ public class FileController {
     public void getImage(@RequestParam("imageName") String imageName,
                          HttpServletResponse response) throws IOException {
         File fileDir = new File(userFilePath);
+        System.out.println("Image request received. imageName: " + imageName);
+        System.out.println("User file path: " + userFilePath);
         File image=new File(fileDir.getAbsolutePath() +"/"+imageName);
+        System.out.println("Attempting to load image from: " + image.getAbsolutePath());
+        if (!image.exists()){
+            System.out.println("Image file does not exist: " + image.getAbsolutePath());
+        }
         if (image.exists()){
             // Determine content type based on file extension
             String contentType = "";

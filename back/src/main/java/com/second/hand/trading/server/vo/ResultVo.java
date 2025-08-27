@@ -20,14 +20,14 @@ public class ResultVo<T> {
     private T data;
 
     //直接返回成功状态码
-    public static ResultVo success(){
-        ResultVo resultVo=new ResultVo();
+    public static <T> ResultVo<T> success(){
+        ResultVo<T> resultVo=new ResultVo<>();
         resultVo.setStatus_code(SUCCESS);
         return resultVo;
     }
 
     //返回成功状态码的同时返回对象
-    public static <T>ResultVo success(T data){
+    public static <T> ResultVo<T> success(T data){
         ResultVo<T> resultVo=new ResultVo<>();
         resultVo.setStatus_code(SUCCESS);
         resultVo.setData(data);
@@ -35,22 +35,23 @@ public class ResultVo<T> {
     }
 
     //直接返回错误状态码
-    public static ResultVo fail(){
-        ResultVo resultVo = new ResultVo();
+    public static <T> ResultVo<T> fail(){
+        ResultVo<T> resultVo = new ResultVo<>();
         resultVo.setStatus_code(ERROR);
+        resultVo.setMsg(ErrorMsg.SYSTEM_ERROR.getMsg());
         return resultVo;
     }
 
     //直接返回错误状态码和错误信息
-    public static ResultVo fail(ErrorMsg errorMsg){
-        ResultVo resultVo = new ResultVo();
-        resultVo.setStatus_code(ERROR);
+    public static <T> ResultVo<T> fail(ErrorMsg errorMsg) {
+        ResultVo<T> resultVo = new ResultVo<>();
+        resultVo.setStatus_code(errorMsg.getErrorCode());
         resultVo.setMsg(errorMsg.getMsg());
         return resultVo;
     }
 
     //返回错误状态码和错误信息的同时返回错误对象
-    public static <T>ResultVo fail(ErrorMsg errorMsg,T data){
+    public static <T> ResultVo<T> fail(ErrorMsg errorMsg, T data){
         ResultVo<T> resultVo=new ResultVo<>();
         resultVo.setStatus_code(ERROR);
         resultVo.setMsg(errorMsg.getMsg());
@@ -59,8 +60,8 @@ public class ResultVo<T> {
     }
 
     //账号不存在
-    public static ResultVo accountNotExist(){
-        ResultVo resultVo = new ResultVo();
+    public static <T> ResultVo<T> accountNotExist(){
+        ResultVo<T> resultVo = new ResultVo<>();
         resultVo.setStatus_code(ACCOUNTNOTEXIST);
         return resultVo;
     }

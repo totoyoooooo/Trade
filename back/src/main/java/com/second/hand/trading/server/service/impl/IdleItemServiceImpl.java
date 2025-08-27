@@ -5,7 +5,6 @@ import com.second.hand.trading.server.model.IdleItemModel;
 import com.second.hand.trading.server.model.TagModel;
 import com.second.hand.trading.server.model.UserModel;
 import com.second.hand.trading.server.service.IdleItemService;
-import com.second.hand.trading.server.tag.TagUtils;
 import com.second.hand.trading.server.vo.PageVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +47,10 @@ public class IdleItemServiceImpl implements IdleItemService {
     public IdleItemModel getIdleItem(Long id) {
         IdleItemModel idleItemModel=idleItemDao.selectByPrimaryKey(id);
         if(idleItemModel!=null){
-            idleItemModel.setUser(userDao.selectByPrimaryKey(idleItemModel.getUserId()));
+            UserModel user = userDao.selectByPrimaryKey(idleItemModel.getUserId());
+            if (user != null) {
+                idleItemModel.setUser(user);
+            }
         }
         return idleItemModel;
     }
@@ -179,7 +181,6 @@ public class IdleItemServiceImpl implements IdleItemService {
         // Default values
         Map<TagModel, Double> tagMap = new HashMap<>();
         double idleItemRatio = 0.7;
-        double tagRatio = 0.3;
 
         UserModel userModel = null;
         if (userId != null) {
@@ -188,9 +189,7 @@ public class IdleItemServiceImpl implements IdleItemService {
 
         if (userModel != null) {
             // 获取所有标签
-            List<TagModel> allTagList = tagDao.getAllTag();
             // 获取标签推荐度Map
-            // tagMap = TagUtils.getTagRecommendation(userModel, allTagList); // 移除对不存在字段的依赖
             // 更新标签推荐度值 (基于 simplified tagMap)
             // double finalTotal1 = Math.abs(tagMap.values().stream().mapToDouble(Double::doubleValue).sum() == 0 ? 1 : tagMap.values().stream().mapToDouble(Double::doubleValue).sum());
             // tagMap.forEach((key, value) -> tagMap.put(key, (value / finalTotal1) * 100));
@@ -275,23 +274,5 @@ public class IdleItemServiceImpl implements IdleItemService {
                 .collect(Collectors.toList());
         return sortedIdle;
     }
-
-    private List<IdleItemModel> getDefaultIdleItemList(List<IdleItemModel> list) {
-        for (IdleItemModel item : list) {
-            item.setUser(null); // 清除用户敏感信息，或者设置为一个默认用户
-        }
-        return list;
-    }
-
-    private int getQuantile(List<Integer> list,int quantile){
-        int size = list.size();
-        if(size == 0 || quantile < 0 || quantile > 1) return -1;
-        double index = (size - 1) * quantile;
-        int lowerIndex = (int) Math.floor(index);
-        int upperIndex = (int) Math.ceil(index);
-        if(lowerIndex == upperIndex) return list.get(lowerIndex);
-        return (int) Math.round(list.get(lowerIndex) + (list.get(upperIndex) - list.get(lowerIndex)) * (index - lowerIndex));
-    }
-
 
 }
