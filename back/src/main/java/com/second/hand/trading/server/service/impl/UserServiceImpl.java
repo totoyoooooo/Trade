@@ -87,28 +87,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public int setCollectTag(Long id,String collectTag) {
-        return userDao.setCollectTag(id,collectTag);
+    public int setCollectTag(Long id, String collectTag) {
+        UserModel userModel = new UserModel();
+        userModel.setId(id);
+        userModel.setCollectTag(collectTag);
+        return userDao.updateByPrimaryKeySelective(userModel);
     }
 
     @Override
     public int setSkimTag(Long id, String skimTag) {
-        return userDao.setSkimTag(id,skimTag);
+        UserModel userModel = new UserModel();
+        userModel.setId(id);
+        userModel.setSkimTag(skimTag);
+        return userDao.updateByPrimaryKeySelective(userModel);
     }
 
     @Override
     public int setIssueTag(Long id, String issueTag) {
-        return userDao.setIssueTag(id,issueTag);
+        UserModel userModel = new UserModel();
+        userModel.setId(id);
+        userModel.setIssueTag(issueTag);
+        return userDao.updateByPrimaryKeySelective(userModel);
     }
 
     @Override
     public int setShieldTag(Long id, String shieldTag) {
-        return userDao.setShieldTag(id,shieldTag);
+        UserModel userModel = new UserModel();
+        userModel.setId(id);
+        userModel.setShieldTag(shieldTag);
+        return userDao.updateByPrimaryKeySelective(userModel);
     }
 
     @Override
     public int setDecreaseTag(Long id, String decreaseTag) {
-        return userDao.setDecreaseTag(id,decreaseTag);
+        UserModel userModel = new UserModel();
+        userModel.setId(id);
+        userModel.setDecreaseTag(decreaseTag);
+        return userDao.updateByPrimaryKeySelective(userModel);
     }
 
     @Override
@@ -123,12 +138,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int setTradeCount(Long id, Long tradeCount) {
-        return userDao.setTradeCount(id,tradeCount);
+        UserModel userModel = new UserModel();
+        userModel.setId(id);
+        userModel.setTradeCount(tradeCount);
+        return userDao.updateByPrimaryKeySelective(userModel);
     }
 
     @Override
     public int setApplauseRate(Long id, int applauseRate) {
-        return userDao.setApplauseRate(id,applauseRate);
+        UserModel userModel = new UserModel();
+        userModel.setId(id);
+        userModel.setApplauseRate(applauseRate);
+        return userDao.updateByPrimaryKeySelective(userModel);
     }
-
 }

@@ -41,17 +41,15 @@ public class UserModel implements Serializable {
 
     private Byte userStatus;
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * 浏览标签
+     */
+    private String skimTag;
 
     /**
      * 收藏标签
      */
     private String collectTag;
-
-    /**
-     * 浏览标签
-     */
-    private String skimTag;
 
     /**
      * 发布标签
@@ -64,13 +62,21 @@ public class UserModel implements Serializable {
     private String shieldTag;
 
     /**
-     * 减少推送标签
+     * 减少推荐标签
      */
     private String decreaseTag;
 
+    /**
+     * 交易次数
+     */
     private Long tradeCount;
 
+    /**
+     * 好评率
+     */
     private int applauseRate;
+
+    private static final long serialVersionUID = 1L;
 
     @Override
     public boolean equals(Object that) {

@@ -99,64 +99,77 @@ export default {
     };
   },
   created() {
-    if (this.getCookie('shUserId') === '') {
+    console.log('chat.vue created() hook triggered.');
+    const userIdFromCookie = this.getCookie('shUserId');
+    console.log('chat.vue - Current userId from cookie:', userIdFromCookie);
+    if(userIdFromCookie === ''){
       this.$message.error('请先登录');
       this.$router.push('/login');
       return;
-    } else {
-      if (this.$route.query.id) {
-        this.addAndGetChat(this.$route.query.id).then(res => {
-          if(res.status_code == 200) {
-            this.getChatList().then(res => {
-            console.log(res.data);
-              if(res.status_code == 200) this.selectChat(this.chatList[0]);
-            });
+    }else{
+      if(this.$route.query.id){
+        console.log('chat.vue - Route query ID found:', this.$route.query.id);
+        this.getNewChatList(Number(userIdFromCookie), Number(this.$route.query.id)).then(() => {
+          if (this.chatList.length > 0) {
+            console.log('Chat created with new chat list:', this.chatList);
+            this.selectChat(this.chatList[0]);
           }
         });
-      } else {
-        this.getChatList();
+      }else{
+        console.log('chat.vue - No route query ID, fetching general chat list.');
+        this.getChatList(Number(userIdFromCookie));
       }
     }
   },
   methods: {
-    addAndGetChat(userId){
-      var user1Id = userId < this.getCookie('shUserId') ? userId : this.getCookie('shUserId');
-      var user2Id = userId < this.getCookie('shUserId') ? this.getCookie('shUserId') : userId;
-      return this.$api.addAndGetChat({
-        id: user1Id + "" + user2Id,
-        user1_id: user1Id,
-        user2_id: user2Id,
+    getNewChatList(userId, type) {
+      console.log('Calling getNewChatList with userId:', userId, 'type:', type);
+      return this.$api.getChatList(
+        { userId: userId, type: type }
+      ).then(res => {
+        console.log('getNewChatList response:', res);
+        if(res.status_code == 200){
+          this.chatList = res.data;
+        } else {
+          this.$message.error('获取新聊天列表失败');
+        }
+      }).catch(error => {
+        console.error('getNewChatList request failed:', error);
+        this.$message.error('获取新聊天列表请求失败');
       });
     },
-    getChatList() {
-      var ans;
-      if(this.$route.query.id){
-        ans = this.$api.getChatList(
-          "userId=" + this.getCookie('shUserId') + "&type=" + this.$route.query.id
-        )
-      }else{
-        ans = this.$api.getChatList(
-          "userId=" + this.getCookie('shUserId') + "&type=-1"
-        )
-      }
-      ans.then(res => {
-        if(res.status_code == 200) this.chatList = res.data;
+    getChatList(userId) {
+      console.log('Calling getChatList with userId:', userId);
+      return this.$api.getChatList(
+        { userId: userId, type: -1 }
+      ).then(res => {
+        console.log('getChatList response:', res);
+        if(res.status_code == 200){
+          this.chatList = res.data;
+        } else {
+          this.$message.error('获取聊天列表失败');
+        }
+      }).catch(error => {
+        console.error('getChatList request failed:', error);
+        this.$message.error('获取聊天列表请求失败');
       });
       if(this.chatList.length == 0){
         this.selectChat(null);
       }
-      return ans;
+      // No return ans;
     },
-    openChat(userId) {
-      var user1Id = userId < this.getCookie('shUserId') ? userId : this.getCookie('shUserId');
-      var user2Id = userId < this.getCookie('shUserId') ? this.getCookie('shUserId') : userId;
+    openChat(userId){
+      var user1Id = userId < this.getCookie('shUserId') ? userId : Number(this.getCookie('shUserId'));
+      var user2Id = userId < this.getCookie('shUserId') ? Number(this.getCookie('shUserId')) : userId; 
+      console.log('Calling openChat with user1Id:', user1Id, 'user2Id:', user2Id, 'getterId:', Number(this.getCookie('shUserId')));
       this.$api.openChat({
         id: user1Id + "" + user2Id,
         user1_id: user1Id,
         user2_id: user2Id,
         getterId: Number(this.getCookie('shUserId'))
       }).then(res => {
-        if (res.status_code == 200) {
+        console.log('openChat response:', res);
+        if(res.status_code == 200){
           this.myUser = res.data.myUser;
           this.otherUser = res.data.otherUser;
           this.chatId = res.data.chatId;
@@ -167,22 +180,41 @@ export default {
           this.$api.clearUnread(
             { chat_id: this.chatId, sender_id: Number(this.getCookie('shUserId')) }
           ).then(res => {
-            if (res.status_code == 200) {
-                this.getChatList();
+            console.log('clearUnread response:', res);
+            if(res.status_code == 200){
+              if(this.$route.query.id){
+                this.getNewChatList(Number(this.getCookie('shUserId')), Number(this.$route.query.id));
+              }else{
+                this.getChatList(Number(this.getCookie('shUserId')));
+              }
+            } else {
+              this.$message.error('清除未读消息失败');
             }
+          }).catch(error => {
+            console.error('clearUnread request failed:', error);
+            this.$message.error('清除未读消息请求失败');
           });
         } else {
           this.$message.error('打开聊天失败');
         }
+      }).catch(error => {
+        console.error('openChat request failed:', error);
+        this.$message.error('打开聊天请求失败');
       });
     },
-    getCookie(cname) {
+    getCookie(cname){
+      console.log('chat.vue - Attempting to get cookie:', cname);
       var name = cname + "=";
       var ca = document.cookie.split(';');
-      for (var i = 0; i < ca.length; i++) {
+      for(var i=0; i<ca.length; i++){
         var c = ca[i].trim();
-        if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+        if (c.indexOf(name)===0) {
+          const cookieValue = c.substring(name.length,c.length);
+          console.log('chat.vue - Cookie found:', cname, 'value:', cookieValue);
+          return cookieValue;
+        }
       }
+      console.log('chat.vue - Cookie not found:', cname);
       return "";
     },
     sendMessage() {
@@ -196,32 +228,45 @@ export default {
         this.inputText = '';
         console.log('Sending message:', newMessage);
         this.$api.sendChatMessage(newMessage).then(res => {
-          if (res.status_code == 200) {
-            this.$webSocket.sendMessage({
-              target: this.otherUser.id,
-              data: {
-                type: 'chat',
-                content: newMessage,
-              }
-            });
-            //this.messages.push(res.data);
-            this.getChatList();
-            this.selectChat(this.selectedChat);
-            this.$nextTick(() => {
-              this.scrollToBottom();
-            });
+            console.log('sendChatMessage response:', res);
+            if(res.status_code == 200){
+              this.$webSocket.sendMessage({
+                target: this.otherUser.id,
+                data: {
+                  type: 'chat',
+                  content: res.data,
+                }
+              });
+              this.messages.push(res.data);
+              // 重新获取聊天列表，以便更新最新消息和未读数
+              this.getChatList(Number(this.getCookie('shUserId')));
+              this.$nextTick(() => {
+                this.scrollToBottom();
+              });
+            } else {
+              this.$message.error('发送消息失败');
+            }
           }
-        });
+        ).catch(
+          error => {
+            console.error('sendChatMessage request failed:', error);
+            this.$message.error('发送消息请求失败');
+          }
+        );
+        
       }
     },
     selectChat(chat) {
       console.log('Selected chat:', chat);
       this.selectedChat = chat;
-      if(chat != null){
-        if (chat.otherId !== undefined && chat.otherId !== null) {
-          this.chatId = chat.id;
-          this.openChat(chat.otherId);
-        }
+      if(chat.otherId !== undefined && chat.otherId !== null){
+        this.chatId = chat.id;
+        this.openChat(chat.otherId);
+      }  else if (chat.user1_id && chat.user2_id && this.getCookie('shUserId')) { // Fallback if otherId is not directly available, deduce from user1_id/user2_id
+        const currentUserId = Number(this.getCookie('shUserId'));
+        const otherUserId = chat.user1_id === currentUserId ? chat.user2_id : chat.user1_id;
+        this.chatId = chat.id;
+        this.openChat(otherUserId);
       }
     },
     getNowTime() {
@@ -307,22 +352,20 @@ export default {
       console.log('Received new-message event:', msg);
       this.getChatList(Number(this.getCookie('shUserId'))); // Refresh chat list on new message
       if (msg.chat_id === this.chatId && this.otherUser) {
-        this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
-        this.selectChat(this.selectedChat);
+        // If the new message is for the currently open chat, refresh it
+        this.openChat(this.otherUser.id);
       }
     });
     this.$bus.$on('revoke-message', (msg) => {
-      this.getChatList();
+      this.getChatList(Number(this.getCookie('shUserId')));
       if (msg.chat_id === this.chatId && this.otherUser) {
-        this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
-        this.selectChat(this.selectedChat);
+        this.openChat(this.otherUser.id);
       }
     });
     this.$bus.$on('online', (msg) => {
-      this.getChatList();
+      this.getChatList(Number(this.getCookie('shUserId')));
       if(this.selectedChat != null){
-        this.selectedChat = this.chatList.find(chat => chat.id === this.selectedChat.id);
-        this.selectChat(this.selectedChat);
+        this.openChat(this.selectedChat.otherId);
       }
     });
   },

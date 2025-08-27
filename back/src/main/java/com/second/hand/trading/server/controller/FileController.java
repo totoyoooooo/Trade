@@ -18,8 +18,7 @@ import java.io.OutputStream;
 @RestController
 public class FileController {
 
-    private  String userFilePath = "D:\\WorkSpace\\progamme\\Codefield\\Project_Vue\\Trade\\pic";
-//    private String userFilePath = new File(System.getProperty("user.dir")).getParentFile().getAbsolutePath() + "\\pic";
+    private String userFilePath = System.getProperty("user.dir") + File.separator + "pic";
 
     @Value("${baseUrl}")
     private String baseUrl;
@@ -48,14 +47,38 @@ public class FileController {
         File fileDir = new File(userFilePath);
         File image=new File(fileDir.getAbsolutePath() +"/"+imageName);
         if (image.exists()){
-            FileInputStream fileInputStream=new FileInputStream(image);
-            byte[] bytes=new byte[fileInputStream.available()];
-            if (fileInputStream.read(bytes)>0){
-                OutputStream outputStream=response.getOutputStream();
-                outputStream.write(bytes);
-                outputStream.close();
+            // Determine content type based on file extension
+            String contentType = "";
+            String fileExtension = imageName.substring(imageName.lastIndexOf(".") + 1).toLowerCase();
+            switch (fileExtension) {
+                case "jpg":
+                case "jpeg":
+                    contentType = "image/jpeg";
+                    break;
+                case "png":
+                    contentType = "image/png";
+                    break;
+                case "gif":
+                    contentType = "image/gif";
+                    break;
+                // Add more cases for other image types if needed
+                default:
+                    contentType = "application/octet-stream"; // Default to generic binary stream
             }
-            fileInputStream.close();
+
+            response.setContentType(contentType);
+            response.setContentLength((int) image.length());
+            System.out.println("Sending image: " + imageName + ", Content-Type: " + contentType + ", Content-Length: " + image.length());
+
+            try (FileInputStream fileInputStream = new FileInputStream(image);
+                 OutputStream outputStream = response.getOutputStream()) {
+                byte[] buffer = new byte[16384]; // Use a larger buffer to read the file in chunks
+                int bytesRead;
+                while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                outputStream.flush(); // Ensure all data is written
+            }
         }
     }
 

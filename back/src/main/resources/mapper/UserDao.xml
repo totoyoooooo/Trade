@@ -9,17 +9,9 @@
     <result column="avatar" jdbcType="VARCHAR" property="avatar" />
     <result column="sign_in_time" jdbcType="TIMESTAMP" property="signInTime" />
     <result column="user_status" jdbcType="TINYINT" property="userStatus"/>
-    <result column="collect_tag" jdbcType="VARCHAR" property="collectTag"/>
-    <result column="skim_tag" jdbcType="VARCHAR" property="skimTag"/>
-    <result column="issue_tag" jdbcType="VARCHAR" property="issueTag"/>
-    <result column="shield_tag" jdbcType="VARCHAR" property="shieldTag"/>
-    <result column="decrease_tag" jdbcType="VARCHAR" property="decreaseTag"/>
-    <result column="trade_count" jdbcType="BIGINT" property="tradeCount"/>
-    <result column="applause_rate" jdbcType="INTEGER" property="applauseRate"/>
-
   </resultMap>
   <sql id="Base_Column_List">
-    id, account_number, nickname, avatar, sign_in_time, user_status, collect_tag, skim_tag, issue_tag, shield_tag, decrease_tag, trade_count, applause_rate
+    id, account_number, nickname, avatar, sign_in_time, user_status
   </sql>
   <select id="getUserByAccountNumber" resultMap="BaseResultMap">
     select id, account_number, nickname, avatar, sign_in_time, user_status
@@ -134,6 +126,27 @@
       </if>
       <if test="userStatus != null">
         user_status = #{userStatus},
+      </if>
+      <if test="collectTag != null">
+        collect_tag = #{collectTag},
+      </if>
+      <if test="skimTag != null">
+        skim_tag = #{skimTag},
+      </if>
+      <if test="issueTag != null">
+        issue_tag = #{issueTag},
+      </if>
+      <if test="shieldTag != null">
+        shield_tag = #{shieldTag},
+      </if>
+      <if test="decreaseTag != null">
+        decrease_tag = #{decreaseTag},
+      </if>
+      <if test="tradeCount != null">
+        trade_count = #{tradeCount},
+      </if>
+      <if test="applauseRate != null">
+        applause_rate = #{applauseRate},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}

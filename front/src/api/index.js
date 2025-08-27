@@ -23,11 +23,10 @@ const api = {
             data: data
         });
     },
-    getUserInfo(query) {
+    getUserInfo() {
         return request({
             url: '/user/info',
             method: 'get',
-            params: query
         });
     },
     getUser(query) {

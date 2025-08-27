@@ -13,7 +13,7 @@ public class TagUtils {
 
     public static List<String> splitTagText(String tagText) {
         List<String> list = new ArrayList<>();
-        if(!tagText.isEmpty()){
+        if(tagText != null && !tagText.isEmpty()){
             String[] tags = tagText.split("#");
             for(int i = 1;i < tags.length;i++){
                 list.add("#" + tags[i]);
@@ -29,7 +29,7 @@ public class TagUtils {
         List<String> tags = splitTagText(tagText);
         ObjectMapper objectMapper = new ObjectMapper();
         List<TagObject> list = new ArrayList<>();
-        if(tagObjects.isEmpty()){
+        if(tagObjects == null || tagObjects.isEmpty()){
             for(String t : tags){
                 TagObject tag = new TagObject(t,1L,"");
                 tag.setTime();

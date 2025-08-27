@@ -99,10 +99,16 @@ public class UserController {
      * @return
      */
     @GetMapping("info")
-    public ResultVo getOneUser(@CookieValue("shUserId") @NotNull(message = "登录异常 请重新登录")
-                               @NotEmpty(message = "登录异常 请重新登录")
-                               String id) {
-        return ResultVo.success(userService.getUser(Long.valueOf(id)));
+    public ResultVo getOneUser(@CookieValue(value = "shUserId", required = false) String id) {
+        if (id == null || id.isEmpty()) {
+            return ResultVo.fail(ErrorMsg.LOGIN_EXPIRED);
+        }
+        try {
+            Long userId = Long.valueOf(id);
+            return ResultVo.success(userService.getUser(userId));
+        } catch (NumberFormatException e) {
+            return ResultVo.fail(ErrorMsg.LOGIN_EXPIRED);
+        }
     }
 
     /**

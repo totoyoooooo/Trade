@@ -4,7 +4,7 @@
             <!-- Logo和品牌区域 -->
             <div class="app-name">
                 <div class="logo-container">
-                    <img src="/miku.jpg" alt="" class="logo-image">
+                    <img src="/saki.png" alt="" class="logo-image">
                     <router-link to="/" class="brand-link">
                         <span class="brand-text">校园二手物品交易平台</span>
                     </router-link>
@@ -116,6 +116,7 @@
             // multi-pages sync
             window.addEventListener('storage', this.handleStorageChange);
             console.log("header");
+            const userIdFromCookie = this.getCookie('shUserId'); // 在这里定义
             if(!this.$globalData.userInfo.nickname){
                 this.$api.getUserInfo().then(res=>{
                     console.log('Header getUserInfo:',res);

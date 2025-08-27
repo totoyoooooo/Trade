@@ -111,20 +111,6 @@ DROP TABLE IF EXISTS `sh_chat_message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_chat_message` (
-<<<<<<< Updated upstream:_localhost-2025_08_01_22_39_44-dump.sql
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `chat_id` varchar(255) DEFAULT NULL,
-  `sender_id` bigint DEFAULT NULL,
-  `content` varchar(255) DEFAULT NULL,
-  `send_time` datetime DEFAULT NULL,
-  `has_read` int DEFAULT '0',
-  `has_revoke` int DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `fk_chat` (`chat_id`),
-  KEY `fk_sender` (`sender_id`),
-  CONSTRAINT `fk_chat` FOREIGN KEY (`chat_id`) REFERENCES `sh_chat` (`id`),
-  CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `sh_user` (`id`)
-=======
                                    `id` bigint NOT NULL AUTO_INCREMENT,
                                    `chat_id` varchar(255) DEFAULT NULL,
                                    `sender_id` bigint DEFAULT NULL,
@@ -137,7 +123,6 @@ CREATE TABLE `sh_chat_message` (
                                    KEY `fk_sender` (`sender_id`),
                                    CONSTRAINT `fk_chat` FOREIGN KEY (`chat_id`) REFERENCES `sh_chat` (`id`),
                                    CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `sh_user` (`id`)
->>>>>>> Stashed changes:db_second_hand_trading_localhost-2025_07_09_16_10_20-dump.sql
 ) ENGINE=InnoDB AUTO_INCREMENT=349 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

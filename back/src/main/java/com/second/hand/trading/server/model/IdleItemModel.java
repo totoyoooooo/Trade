@@ -48,6 +48,16 @@ public class IdleItemModel implements Serializable {
     private Integer idleLabel;
 
     /**
+     * 闲置标签
+     */
+    private String idleTag;
+
+    /**
+     * 浏览次数
+     */
+    private Long skimCount;
+
+    /**
      * 发布时间
      */
     private Date releaseTime;
@@ -66,9 +76,6 @@ public class IdleItemModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String idleTag;
-
-    private Long skimCount;
 
     @Override
     public boolean equals(Object that) {
@@ -89,6 +96,8 @@ public class IdleItemModel implements Serializable {
                 && (this.getIdlePrice() == null ? other.getIdlePrice() == null : this.getIdlePrice().equals(other.getIdlePrice()))
                 && (this.getIdlePlace() == null ? other.getIdlePlace() == null : this.getIdlePlace().equals(other.getIdlePlace()))
                 && (this.getIdleLabel() == null ? other.getIdleLabel() == null : this.getIdleLabel().equals(other.getIdleLabel()))
+                && (this.getIdleTag() == null ? other.getIdleTag() == null : this.getIdleTag().equals(other.getIdleTag()))
+                && (this.getSkimCount() == null ? other.getSkimCount() == null : this.getSkimCount().equals(other.getSkimCount()))
                 && (this.getReleaseTime() == null ? other.getReleaseTime() == null : this.getReleaseTime().equals(other.getReleaseTime()))
                 && (this.getIdleStatus() == null ? other.getIdleStatus() == null : this.getIdleStatus().equals(other.getIdleStatus()))
                 && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()));
@@ -105,6 +114,8 @@ public class IdleItemModel implements Serializable {
         result = prime * result + ((getIdlePrice() == null) ? 0 : getIdlePrice().hashCode());
         result = prime * result + ((getIdlePlace() == null) ? 0 : getIdlePlace().hashCode());
         result = prime * result + ((getIdleLabel() == null) ? 0 : getIdleLabel().hashCode());
+        result = prime * result + ((getIdleTag() == null) ? 0 : getIdleTag().hashCode());
+        result = prime * result + ((getSkimCount() == null) ? 0 : getSkimCount().hashCode());
         result = prime * result + ((getReleaseTime() == null) ? 0 : getReleaseTime().hashCode());
         result = prime * result + ((getIdleStatus() == null) ? 0 : getIdleStatus().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
@@ -124,6 +135,8 @@ public class IdleItemModel implements Serializable {
         sb.append(", idlePrice=").append(idlePrice);
         sb.append(", idlePlace=").append(idlePlace);
         sb.append(", idleLabel=").append(idleLabel);
+        sb.append(", idleTag=").append(idleTag);
+        sb.append(", skimCount=").append(skimCount);
         sb.append(", releaseTime=").append(releaseTime);
         sb.append(", idleStatus=").append(idleStatus);
         sb.append(", userId=").append(userId);

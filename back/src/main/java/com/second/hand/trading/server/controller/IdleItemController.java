@@ -45,14 +45,23 @@ public class IdleItemController {
     @GetMapping("info")
     public ResultVo getIdleItem(@RequestParam(value = "id") Long id,
                                 @RequestParam(value = "userId") String userId){
-        if(!userId.isEmpty()){
-            String tag = idleItemService.getIdleItem(id).getIdleTag();
-            String tagObject = userService.getUser(Long.valueOf(userId)).getSkimTag() == null ? "" : userService.getUser(Long.valueOf(userId)).getSkimTag();
-            String newSkimTag = TagUtils.addTag(tagObject,tag);
-            userService.setSkimTag(Long.valueOf(userId),newSkimTag);
-            idleItemService.addSkimCount(id);
+        IdleItemModel idleItemModel = idleItemService.getIdleItem(id);
+        if (idleItemModel == null) {
+            return ResultVo.fail(ErrorMsg.DATA_NOT_EXIST);
         }
-        return ResultVo.success(idleItemService.getIdleItem(id));
+
+        if(!userId.isEmpty()){
+            // Check if user exists before processing skim tags
+            Long userIdLong = Long.valueOf(userId);
+            if (userService.getUser(userIdLong) != null) {
+                String tag = idleItemModel.getIdleTag();
+                String tagObject = userService.getUser(userIdLong).getSkimTag() == null ? "" : userService.getUser(userIdLong).getSkimTag();
+                String newSkimTag = TagUtils.addTag(tagObject,tag);
+                userService.setSkimTag(userIdLong,newSkimTag);
+                idleItemService.addSkimCount(id);
+            }
+        }
+        return ResultVo.success(idleItemModel);
     }
 
     @GetMapping("all")
