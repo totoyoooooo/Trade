@@ -30,6 +30,7 @@ public class MCPClient {
         try {
             log.info("启动MCP服务器进程...");
             this.mcpProcess = processBuilder.start();
+            // 对于 java 程序来说， mcpProcess.getOutputStream() 拿到输出到 mcpProcess 的输出流
             this.processInput = new BufferedWriter(new OutputStreamWriter(this.mcpProcess.getOutputStream()));
             this.processOutput = new BufferedReader(new InputStreamReader(this.mcpProcess.getInputStream()));
 

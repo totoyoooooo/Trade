@@ -754,6 +754,7 @@ public class AIAgentServiceImpl implements AIAgentService {
                 log.info("工具调用完成: {} -> 结果长度: {}", toolName,
                         toolResult == null ? 0 : toolResult.length());
 
+                // 将工具调用结果加入上下文中
                 messages.add(Map.of(
                         "role", "tool",
                         "tool_call_id", toolCallId,

@@ -10,8 +10,8 @@
                         <p>发现你需要的好物</p>
                     </div>
                     <div class="category-tabs">
-                        <button 
-                            v-for="(category, index) in categories" 
+                        <button
+                            v-for="(category, index) in categories"
                             :key="category.value"
                             :class="['category-btn', { active: labelName === category.value }]"
                             @click="handleCategoryClick(category.value)">
@@ -27,13 +27,14 @@
                         <h3>{{ getCurrentCategoryName() }}</h3>
                         <div class="products-count">共 {{ totalItem }} 件商品</div>
                     </div>
-                    
+
                     <div class="products-grid">
-                        <div 
-                            v-for="idle in idleList" 
+                        <div
+                            v-for="(idle, index) in idleList"
                             :key="idle.id"
                             class="product-card"
-                            @click="toDetails(idle)">
+                            @click="toDetails(idle)"
+                            @contextmenu.prevent="showContextMenu($event, idle, index)">
                             <!-- 商品图片 -->
                             <div class="product-image">
                                 <el-image
@@ -55,7 +56,7 @@
                             <!-- 商品信息 -->
                             <div class="product-info">
                                 <h4 class="product-title">{{ idle.idleName }}</h4>
-                                
+
                                 <div class="product-details">
                                     <div class="price-section">
                                         <span class="price">¥{{ idle.idlePrice }}</span>
@@ -69,8 +70,8 @@
                                 <!-- 用户信息 -->
                                 <div class="seller-info">
                                     <div class="seller-avatar">
-                                        <el-avatar 
-                                            :src="idle.user.avatar" 
+                                        <el-avatar
+                                            :src="idle.user.avatar"
                                             :size="24"
                                             class="avatar">
                                             <i class="el-icon-user-solid"></i>
@@ -86,7 +87,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- 加载状态 -->
                     <div v-if="loading" class="loading-grid">
                         <div v-for="n in 8" :key="n" class="loading-card">
@@ -113,8 +113,27 @@
                     </div>
                 </div>
             </div>
+
             <app-foot></app-foot>
         </app-body>
+        <Teleport to="body">
+            <!-- 右键菜单 -->
+            <div v-if="contextMenu.visible" :style="{
+                    position: 'fixed',
+                    top: contextMenu.y + 'px',
+                    left: contextMenu.x + 'px',
+                    background: '#fff',
+                    border: '1px solid #eee',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    zIndex: 9999,
+                    borderRadius: '4px'
+                }" @click.stop>
+                <div class="context-menu-item" style="padding: 8px 20px; cursor: pointer;"
+                     @click="blockItem(contextMenu.item)">屏蔽</div>
+                <div class="context-menu-item" style="padding: 8px 20px; cursor: pointer;"
+                     @click="lessRecommend(contextMenu.item)">减少推荐</div>
+            </div>
+        </Teleport>
     </div>
 </template>
 
@@ -123,154 +142,154 @@ import AppHead from '../common/AppHeader.vue';
 import AppBody from '../common/AppPageBody.vue'
 import AppFoot from '../common/AppFoot.vue'
 
-    export default {
-        name: "index",
-        components: {
-            AppHead,
-            AppBody,
-            AppFoot
+export default {
+    name: "index",
+    components: {
+        AppHead,
+        AppBody,
+        AppFoot
+    },
+    data() {
+        return {
+            labelName: '0',
+            idleList: [],
+            currentPage: 1,
+            totalItem: 1,
+            loading: false,
+            categories: [
+                { value: '0', label: '全部', icon: 'el-icon-menu' },
+                { value: '1', label: '数码', icon: 'el-icon-mobile-phone' },
+                { value: '2', label: '家电', icon: 'el-icon-refrigerator' },
+                { value: '3', label: '户外', icon: 'el-icon-bicycle' },
+                { value: '4', label: '图书', icon: 'el-icon-reading' },
+                { value: '5', label: '其他', icon: 'el-icon-more-outline' }
+            ],
+            contextMenu: {
+                visible: false,
+                x: 0,
+                y: 0,
+                item: null,
+                index: null
+            }
+        };
+    },
+    created() {
+        this.findIdleTiem(1)
+    },
+    watch:{
+        $route(to,from){
+            this.labelName=to.query.labelName;
+            let val=parseInt(to.query.page)?parseInt(to.query.page):1;
+            this.currentPage=parseInt(to.query.page)?parseInt(to.query.page):1;
+            this.findIdleTiem(val);
+        }
+    },
+    methods: {
+        getCurrentCategoryName() {
+            const category = this.categories.find(cat => cat.value === this.labelName);
+            return category ? category.label : '全部';
         },
-        data() {
-            return {
-                labelName: '0',
-                idleList: [],
-                currentPage: 1,
-                totalItem: 1,
-                loading: false,
-                categories: [
-                    { value: '0', label: '全部', icon: 'el-icon-menu' },
-                    { value: '1', label: '数码', icon: 'el-icon-mobile-phone' },
-                    { value: '2', label: '家电', icon: 'el-icon-refrigerator' },
-                    { value: '3', label: '户外', icon: 'el-icon-bicycle' },
-                    { value: '4', label: '图书', icon: 'el-icon-reading' },
-                    { value: '5', label: '其他', icon: 'el-icon-more-outline' }
-                ],
-                contextMenu: {
-                    visible: false,
-                    x: 0,
-                    y: 0,
-                    item: null,
-                    index: null
-                }
-            };
+        handleCategoryClick(value) {
+            this.labelName = value;
+            this.$router.replace({query: {page: 1, labelName: value}});
         },
-        created() {
-            this.findIdleTiem(1)
-        },
-        watch:{
-            $route(to,from){
-                this.labelName=to.query.labelName;
-                let val=parseInt(to.query.page)?parseInt(to.query.page):1;
-                this.currentPage=parseInt(to.query.page)?parseInt(to.query.page):1;
-                this.findIdleTiem(val);
+        findIdleTiem(page) {
+            this.loading = true;
+            if (this.labelName > 0) {
+                this.$api.findIdleTiemByLable({
+                    idleLabel: this.labelName,
+                    page: page,
+                    nums: 8
+                }).then(res => {
+                    let list = res.data.list;
+                    for (let i = 0; i < list.length; i++) {
+                        list[i].timeStr = list[i].releaseTime.substring(0, 10) + " " + list[i].releaseTime.substring(11, 19);
+                        let pictureList = JSON.parse(list[i].pictureList);
+                        list[i].imgUrl = pictureList.length > 0 ? pictureList[0] : '';
+                    }
+                    this.idleList = list;
+                    this.totalItem = res.data.count;
+                }).catch(e => {
+                    console.log(e)
+                }).finally(() => {
+                    this.loading = false;
+                })
+            } else {
+                this.$api.findIdleTiem({
+                    page: page,
+                    nums: 8
+                }).then(res => {
+                    let list = res.data.list;
+                    for (let i = 0; i < list.length; i++) {
+                        list[i].timeStr = list[i].releaseTime.substring(0, 10) + " " + list[i].releaseTime.substring(11, 19);
+                        let pictureList = JSON.parse(list[i].pictureList);
+                        list[i].imgUrl = pictureList.length > 0 ? pictureList[0] : '';
+                    }
+                    this.idleList = list;
+                    this.totalItem = res.data.count;
+                }).catch(e => {
+                    console.log(e)
+                }).finally(() => {
+                    this.loading = false;
+                })
             }
         },
-        methods: {
-            getCurrentCategoryName() {
-                const category = this.categories.find(cat => cat.value === this.labelName);
-                return category ? category.label : '全部';
-            },
-            handleCategoryClick(value) {
-                this.labelName = value;
-                this.$router.replace({query: {page: 1, labelName: value}});
-            },
-            findIdleTiem(page){
-                this.loading = true;
-                if(this.labelName > 0){
-                    this.$api.findIdleTiemByLable({
-                        idleLabel:this.labelName,
-                        page: page,
-                        nums: 8
-                    }).then(res => {
-                        let list = res.data.list;
-                        for (let i = 0; i < list.length; i++) {
-                            list[i].timeStr = list[i].releaseTime.substring(0, 10) + " " + list[i].releaseTime.substring(11, 19);
-                            let pictureList = JSON.parse(list[i].pictureList);
-                            list[i].imgUrl = pictureList.length > 0 ? pictureList[0] : '';
-                        }
-                        this.idleList = list;
-                        this.totalItem=res.data.count;
-                    }).catch(e => {
-                        console.log(e)
-                    }).finally(()=>{
-                        this.loading = false;
-                    })
-                }else{
-                    this.$api.findIdleTiem({
-                        page: page,
-                        nums: 8
-                    }).then(res => {
-                        let list = res.data.list;
-                        for (let i = 0; i < list.length; i++) {
-                            list[i].timeStr = list[i].releaseTime.substring(0, 10) + " " + list[i].releaseTime.substring(11, 19);
-                            let pictureList = JSON.parse(list[i].pictureList);
-                            list[i].imgUrl = pictureList.length > 0 ? pictureList[0] : '';
-                        }
-                        this.idleList = list;
-                        this.totalItem=res.data.count;
-                    }).catch(e => {
-                        console.log(e)
-                    }).finally(()=>{
-                        this.loading = false;
-                    })
-                }
-            },
-            handleClick(tab, event) {
-                console.log(this.labelName);
-                this.$router.replace({ query: { page: 1, labelName: this.labelName } });
-            },
-            handleCurrentChange(val) {
-                console.log(`当前页: ${val}`);
-                this.$router.replace({ query: { page: val, labelName: this.labelName } });
-            },
-            toDetails(idle) {
-                this.$router.push({ path: '/details', query: { id: idle.id } });
-            },
-            getCookie(cname) {
-                var name = cname + "=";
-                var ca = document.cookie.split(';');
-                for (var i = 0; i < ca.length; i++) {
-                    var c = ca[i].trim();
-                    if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
-                }
-                return "";
-            },
-            showContextMenu(e, idle, index) {
-                this.contextMenu.visible = true;
-                this.contextMenu.x = e.clientX;
-                this.contextMenu.y = e.clientY;
-                this.contextMenu.item = idle;
-                this.contextMenu.index = index;
-                document.addEventListener('click', this.hideContextMenu);
-            },
-            hideContextMenu() {
-                this.contextMenu.visible = false;
-                document.removeEventListener('click', this.hideContextMenu);
-            },
-            blockItem(item) {
-                this.hideContextMenu();
-                this.$api.addShield({
-                    idleId: item.id,
-                }).then(res => {
-                    this.$message({ type: 'warning', message: `已屏蔽：${item.idleName}` });
-                    this.findIdleTiem(this.currentPage);
-                }).catch(e => {
+        handleClick(tab, event) {
+            console.log(this.labelName);
+            this.$router.replace({query: {page: 1, labelName: this.labelName}});
+        },
+        handleCurrentChange(val) {
+            console.log(`当前页: ${val}`);
+            this.$router.replace({query: {page: val, labelName: this.labelName}});
+        },
+        toDetails(idle) {
+            this.$router.push({path: '/details', query: {id: idle.id}});
+        },
+        getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i].trim();
+                if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+            }
+            return "";
+        },
+        showContextMenu(e, idle, index) {
+            this.contextMenu.visible = true;
+            this.contextMenu.x = e.clientX;
+            this.contextMenu.y = e.clientY;
+            this.contextMenu.item = idle;
+            this.contextMenu.index = index;
+            document.addEventListener('click', this.hideContextMenu);
+        },
+        hideContextMenu() {
+            this.contextMenu.visible = false;
+            document.removeEventListener('click', this.hideContextMenu);
+        },
+        blockItem(item) {
+            this.hideContextMenu();
+            this.$api.addShield({
+                idleId: item.id,
+            }).then(res => {
+                this.$message({type: 'warning', message: `已屏蔽：${item.idleName}`});
+                this.findIdleTiem(this.currentPage);
+            }).catch(e => {
 
-                });
-            },
-            lessRecommend(item) {
-                this.hideContextMenu();
-                this.$api.decreaseRecommendation({
-                    id: item.id
-                }).then(res => {
-                    this.$message({ type: 'info', message: `已减少推荐：${item.idleName}` });
-                    this.findIdleTiem(this.currentPage);
-                }).catch(e => {
-                    console.log(e);
-                });
-            },
-        }
+            });
+        },
+        lessRecommend(item) {
+            this.hideContextMenu();
+            this.$api.decreaseRecommendation({
+                id: item.id
+            }).then(res => {
+                this.$message({type: 'info', message: `已减少推荐：${item.idleName}`});
+                this.findIdleTiem(this.currentPage);
+            }).catch(e => {
+                console.log(e);
+            });
+        },
     }
+}
 </script>
 
 <style scoped>
@@ -658,25 +677,25 @@ import AppFoot from '../common/AppFoot.vue'
     .modern-index-container {
         padding: 1rem;
     }
-    
+
     .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 1rem;
     }
-    
+
     .category-tabs {
         gap: 0.5rem;
     }
-    
+
     .category-btn {
         padding: 0.6rem 1rem;
         font-size: 0.9rem;
     }
-    
+
     .nav-title h2 {
         font-size: 1.75rem;
     }
-    
+
     .products-header {
         flex-direction: column;
         align-items: flex-start;
@@ -688,13 +707,13 @@ import AppFoot from '../common/AppFoot.vue'
     .products-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .category-tabs {
         justify-content: flex-start;
         overflow-x: auto;
         padding-bottom: 0.5rem;
     }
-    
+
     .category-btn {
         flex-shrink: 0;
     }
