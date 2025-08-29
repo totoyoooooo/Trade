@@ -392,3 +392,31 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+--
+-- Table structure for table `sh_wanted_item`
+--
+
+DROP TABLE IF EXISTS `sh_wanted_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sh_wanted_item` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `wanted_name` varchar(64) NOT NULL COMMENT '求购物品名称',
+  `wanted_details` varchar(2048) NOT NULL COMMENT '求购详情',
+  `user_id` bigint NOT NULL COMMENT '用户主键id',
+  `release_time` datetime NOT NULL COMMENT '发布时间',
+  `wanted_status` tinyint NOT NULL COMMENT '状态（发布1、下架2、删除0）',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `user_id_index` (`user_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sh_wanted_item`
+--
+
+LOCK TABLES `sh_wanted_item` WRITE;
+/*!40000 ALTER TABLE `sh_wanted_item` DISABLE KEYS */;
+/*!40000 ALTER TABLE `sh_wanted_item` ENABLE KEYS */;
+UNLOCK TABLES;
