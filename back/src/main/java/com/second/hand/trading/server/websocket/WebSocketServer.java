@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import java.io.IOException;
 import java.util.*;
 
 @ServerEndpoint("/websocket/{userId}")
@@ -66,14 +67,16 @@ public class WebSocketServer {
     }
 
     public void sendAllMessage(String message) {
-        for (WebSocketServer webSocket : onlineStatusMap.values()) {
-            Session session = webSocket.session;
-            if (session != null && session.isOpen()) {
-                session.getAsyncRemote().sendText(message, result -> {
-                    if (!result.isOK()) {
-                        System.err.println("发送失败: " + result.getException());
+        synchronized (onlineStatusMap) {
+            for (WebSocketServer server : onlineStatusMap.values()) {
+                Session session = server.session;
+                if (session != null && session.isOpen()) {
+                    try {
+                        session.getBasicRemote().sendText(message);
+                    } catch (IOException e) {
+                        System.err.println("发送失败: " + e.getMessage());
                     }
-                });
+                }
             }
         }
     }

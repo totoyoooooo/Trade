@@ -24,7 +24,7 @@
                 <el-table-column prop="wantedName" label="求购物品名称"></el-table-column>
                 <el-table-column prop="maxPrice" label="最高预算"></el-table-column>
                 <el-table-column prop="wantedPlace" label="期望交易地点"></el-table-column>
-                <el-table-column prop="postTime" label="发布时间"></el-table-column>
+                <el-table-column prop="releaseTime" label="发布时间"></el-table-column>
                 <el-table-column label="发布人">
                     <template slot-scope="scope">
                         <el-link type="primary" @click="goToUserDetail(scope.row.userId)">{{ scope.row.user ? scope.row.user.nickname : '未知' }}</el-link>
@@ -179,7 +179,7 @@ export default {
         },
         handleContact(index, row) {
             if (this.userInfo && this.userInfo.id) {
-                this.$router.push({ path: '/chat', query: { otherId: row.userId } });
+                this.$router.push({ path: '/chat', query: {id: row.userId } });
             } else {
                 this.$message.error('请先登录再联系他人');
             }
