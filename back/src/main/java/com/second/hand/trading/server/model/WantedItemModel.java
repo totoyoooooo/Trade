@@ -29,19 +29,9 @@ public class WantedItemModel implements Serializable {
     private BigDecimal maxPrice;
 
     /**
-     * 期望交易地点
-     */
-    private String wantedPlace;
-
-    /**
-     * 分类标签
-     */
-    private Integer wantedLabel;
-
-    /**
      * 发布时间
      */
-    private Date postTime;
+    private Date releaseTime;
 
     /**
      * 状态（发布1、已找到2、过期3、删除0）
@@ -89,28 +79,12 @@ public class WantedItemModel implements Serializable {
         this.maxPrice = maxPrice;
     }
 
-    public String getWantedPlace() {
-        return wantedPlace;
+    public Date getReleaseTime() {
+        return releaseTime;
     }
 
-    public void setWantedPlace(String wantedPlace) {
-        this.wantedPlace = wantedPlace;
-    }
-
-    public Integer getWantedLabel() {
-        return wantedLabel;
-    }
-
-    public void setWantedLabel(Integer wantedLabel) {
-        this.wantedLabel = wantedLabel;
-    }
-
-    public Date getPostTime() {
-        return postTime;
-    }
-
-    public void setPostTime(Date postTime) {
-        this.postTime = postTime;
+    public void setReleaseTime(Date releaseTime) {
+        this.releaseTime = releaseTime;
     }
 
     public Byte getWantedStatus() {
@@ -153,9 +127,7 @@ public class WantedItemModel implements Serializable {
             && (this.getWantedName() == null ? other.getWantedName() == null : this.getWantedName().equals(other.getWantedName()))
             && (this.getWantedDetails() == null ? other.getWantedDetails() == null : this.getWantedDetails().equals(other.getWantedDetails()))
             && (this.getMaxPrice() == null ? other.getMaxPrice() == null : this.getMaxPrice().equals(other.getMaxPrice()))
-            && (this.getWantedPlace() == null ? other.getWantedPlace() == null : this.getWantedPlace().equals(other.getWantedPlace()))
-            && (this.getWantedLabel() == null ? other.getWantedLabel() == null : this.getWantedLabel().equals(other.getWantedLabel()))
-            && (this.getPostTime() == null ? other.getPostTime() == null : this.getPostTime().equals(other.getPostTime()))
+            && (this.getReleaseTime() == null ? other.getReleaseTime() == null : this.getReleaseTime().equals(other.getReleaseTime()))
             && (this.getWantedStatus() == null ? other.getWantedStatus() == null : this.getWantedStatus().equals(other.getWantedStatus()))
             && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()));
     }
@@ -168,9 +140,7 @@ public class WantedItemModel implements Serializable {
         result = prime * result + ((getWantedName() == null) ? 0 : getWantedName().hashCode());
         result = prime * result + ((getWantedDetails() == null) ? 0 : getWantedDetails().hashCode());
         result = prime * result + ((getMaxPrice() == null) ? 0 : getMaxPrice().hashCode());
-        result = prime * result + ((getWantedPlace() == null) ? 0 : getWantedPlace().hashCode());
-        result = prime * result + ((getWantedLabel() == null) ? 0 : getWantedLabel().hashCode());
-        result = prime * result + ((getPostTime() == null) ? 0 : getPostTime().hashCode());
+        result = prime * result + ((getReleaseTime() == null) ? 0 : getReleaseTime().hashCode());
         result = prime * result + ((getWantedStatus() == null) ? 0 : getWantedStatus().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         return result;
@@ -186,9 +156,7 @@ public class WantedItemModel implements Serializable {
         sb.append(", wantedName=").append(wantedName);
         sb.append(", wantedDetails=").append(wantedDetails);
         sb.append(", maxPrice=").append(maxPrice);
-        sb.append(", wantedPlace=").append(wantedPlace);
-        sb.append(", wantedLabel=").append(wantedLabel);
-        sb.append(", postTime=").append(postTime);
+        sb.append(", releaseTime=").append(releaseTime);
         sb.append(", wantedStatus=").append(wantedStatus);
         sb.append(", userId=").append(userId);
         sb.append(", serialVersionUID=").append(serialVersionUID);

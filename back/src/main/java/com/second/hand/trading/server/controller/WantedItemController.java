@@ -19,7 +19,7 @@ public class WantedItemController {
 
     @PostMapping
     public ResultVo addWantedItem(@RequestBody WantedItemModel wantedItemModel) {
-        wantedItemModel.setPostTime(new Date());
+        wantedItemModel.setReleaseTime(new Date());
         wantedItemModel.setWantedStatus((byte)1);
         WantedItemModel result = wantedItemService.addWantedItem(wantedItemModel);
         if (result != null) {

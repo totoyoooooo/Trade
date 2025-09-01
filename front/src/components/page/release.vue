@@ -146,7 +146,7 @@
                         </el-upload>
                         <div class="picture-list">
                             <el-image style="width: 600px;height:400px; margin-bottom: 2px;" fit="contain"
-                                      v-for="(img,index) in imgList" :src="img"
+                                      v-for="img in imgList" :key="img" :src="img"
                                       :preview-src-list="imgList"></el-image>
                         </div>
                         <el-dialog :visible.sync="imgDialogVisible">
@@ -327,7 +327,7 @@
             // --- 标签相关方法 ---
             // 获取所有标签
             fetchAllTags() {
-                this.$api.getAllTag().then(res => {
+                this.$api.getAllTag({}).then(res => {
                     if (res.status_code === 200 && Array.isArray(res.data)) {
                         this.allTags = res.data;
                     }
@@ -400,40 +400,34 @@
                 if (!inputEl) return null;
                 const cursorPos = inputEl.selectionStart;
 
-                // 找到所有#的位置
-                let tagPositions = [];
-                for (let i = 0; i < input.length; i++) {
-                    if (input[i] === '#') tagPositions.push(i);
-                }
-                if (tagPositions.length === 0) return null;
+                let start = -1;
+                let end = -1;
 
-                // 找到光标所在的标签区间
-                let start = -1, end = input.length;
-                for (let i = 0; i < tagPositions.length; i++) {
-                    if (tagPositions[i] < cursorPos) {
-                        start = tagPositions[i];
-                    }
-                    if (tagPositions[i] > cursorPos) {
-                        end = tagPositions[i];
+                // 找到光标前的最后一个'#'
+                for (let i = cursorPos - 1; i >= 0; i--) {
+                    if (input[i] === '#') {
+                        start = i;
                         break;
                     }
                 }
-                // 如果光标正好在某个#前，也归到前一个标签
-                if (tagPositions.includes(cursorPos)) {
-                    const idx = tagPositions.indexOf(cursorPos);
-                    if (idx > 0) {
-                        start = tagPositions[idx - 1];
-                        end = tagPositions[idx];
+
+                // 如果没有找到'#', 或者光标不在一个tag内
+                if (start === -1 || cursorPos <= start) {
+                    return null;
+                }
+
+                // 找到从start开始的下一个空格或者'#'
+                for (let i = start + 1; i < input.length; i++) {
+                    if (input[i] === ' ' || input[i] === '#') {
+                        end = i;
+                        break;
                     }
                 }
-                // 特殊处理：如果光标正好在#上，归到前一个标签
-                if (input[cursorPos - 1] === '#') {
-                    start = cursorPos - 1;
-                 // end 需要重新找
-                    end = input.indexOf('#', start + 1);
-                    if (end === -1) end = input.length;
+
+                if (end === -1) {
+                    end = input.length;
                 }
-                if (start === -1) return null;
+                
                 const tagText = input.substring(start, end);
                 return { tagText, start, end };
             },

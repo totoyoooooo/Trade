@@ -417,15 +417,15 @@ const api = {
     getAkinTag(query) {
         return request({
             url: '/tag/getAkinTag',
-            method: 'post',
-            data: query
+            method: 'get',
+            params: query
         });
     },
     getAllTag(query) {
         return request({
             url: '/tag/getAllTag',
-            method: 'post',
-            data: query
+            method: 'get',
+            params: query
         });
     },
     addShield(data) {

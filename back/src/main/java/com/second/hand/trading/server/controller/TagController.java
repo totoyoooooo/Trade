@@ -44,7 +44,7 @@ public class TagController {
         return ResultVo.fail();
     }
 
-    @PostMapping("getAllTag")
+    @GetMapping("getAllTag")
     public ResultVo getAllTag() {
         List<TagModel> list = tagService.getAllTag();
         if (list == null) {

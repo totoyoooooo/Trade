@@ -420,3 +420,7 @@ LOCK TABLES `sh_wanted_item` WRITE;
 /*!40000 ALTER TABLE `sh_wanted_item` DISABLE KEYS */;
 /*!40000 ALTER TABLE `sh_wanted_item` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+ALTER TABLE sh_wanted_item
+ADD COLUMN max_price DECIMAL(10, 2) DEFAULT 0.00;
