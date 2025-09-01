@@ -209,6 +209,7 @@ import AppHead from '../common/AppHeader.vue';
 import AppBody from '../common/AppPageBody.vue'
 import AppFoot from '../common/AppFoot.vue'
 import options from '../common/country-data.js'
+import {getAddress} from "@/api/address";
 
 export default {
     name: "me",
@@ -290,38 +291,36 @@ export default {
     },
     methods: {
         getCurrentLocation() {
-            //  确保浏览器支持地理定位
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const latitude = position.coords.latitude;
                         const longitude = position.coords.longitude;
-                        // 在下方替换为您从高德开放平台申请的Web服务API Key
-                        const apiKey = '507584ffde4ed3d97c84a18a763c33be';
 
-                        // 调用高德逆地理编码API
-                        fetch(`https://restapi.amap.com/v3/geocode/regeo?output=json&location=${longitude},${latitude}&key=${apiKey}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status === '1' && data.regeocode) {
-                                    const address = data.regeocode.addressComponent;
-
-                                    console.log('高德返回的完整地址结构:', address);
+                        // 调用封装好的 getAddress 函数
+                        getAddress({
+                            longitude: longitude,
+                            latitude: latitude
+                        })
+                            .then(response => {
+                                if (response.code === 200 && response.data) {
+                                    const address = response.data.addressComponent;
 
                                     this.addressInfo.provinceName = address.province;
                                     this.addressInfo.cityName = address.city;
                                     this.addressInfo.regionName = address.district || '';
-                                    this.selectedOptions = [address.province, address.city, address.district || ''];
+                                    this.selectedOptions = [
+                                        address.province,
+                                        address.city,
+                                        address.district || ''
+                                    ];
 
-                                    // 安全地拼接详细地址字符串
-                                    let detail = address.township || ''; // 获取乡镇/街道信息
+                                    // 安全拼接详细地址
+                                    let detail = address.township || '';
 
-                                    // 先判断 street 是否为字符串再拼接
                                     if (typeof address.street === 'string') {
                                         detail += address.street;
                                     }
-
-                                    // 再判断 streetNumber 是否为字符串再拼接
                                     if (typeof address.streetNumber === 'string') {
                                         detail += address.streetNumber;
                                     }
@@ -331,16 +330,31 @@ export default {
                                     this.$message.success('地址定位成功！');
                                 } else {
                                     this.$message.error('地址解析失败，请稍后重试。');
-                                    console.error('高德API错误:', data.info);
+                                    console.error('地址解析失败:', response.msg);
                                 }
                             })
                             .catch(error => {
                                 this.$message.error('请求定位服务时发生网络错误。');
-                                console.error('Fetch API error:', error);
+                                console.error('getAddress error:', error);
                             });
                     },
                     (error) => {
-                        this.$message.error('无法获取您的位置，请检查浏览器设置和权限。');
+                        let errorMsg = '无法获取您的位置';
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = '用户拒绝了位置权限请求';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = '位置信息不可用';
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = '获取位置超时';
+                                break;
+                            default:
+                                errorMsg = '未知错误';
+                                break;
+                        }
+                        this.$message.error('无法获取您的位置，请检查浏览器设置和权限。(' + errorMsg + ')');
                         console.error('Geolocation error:', error);
                     }
                 );

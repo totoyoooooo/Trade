@@ -105,9 +105,10 @@
                             v-model="selectedOptions"
                             @change="handleChange"
                             :separator="' '"
-                            style="width: 90%;"
+                            style="width: 60%;"
                         >
                         </el-cascader>
+                        <el-button type="primary" plain @click="getCurrentLocation" icon="el-icon-location-outline" style="margin-left: 2.5%">获取当前位置</el-button>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
                         <div>
@@ -168,6 +169,7 @@ import AppHead from '../common/AppHeader.vue';
 import AppBody from '../common/AppPageBody.vue'
 import AppFoot from '../common/AppFoot.vue'
 import options from '../common/country-data.js'
+import {getAddress} from "@/api/address";
 
 export default {
     name: "release",
@@ -246,6 +248,61 @@ export default {
         this.fetchAllTags();
     },
     methods: {
+        getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        getAddress({
+                            longitude: longitude,
+                            latitude: latitude
+                        }).then(response => {
+                            if (response.code === 200 && response.data) {
+                                const address = response.data.addressComponent;
+
+                                this.selectedOptions = [
+                                    address.province,
+                                    address.city,
+                                    address.district || ''
+                                ];
+                                this.$message.success('地址定位成功！');
+                                this.handleChange(this.selectedOptions);
+                            } else {
+                                this.$message.error('地址解析失败，请稍后重试。');
+                                console.error('地址解析失败:', response.msg);
+                            }
+                        })
+                        .catch(error => {
+                            this.$message.error('请求定位服务时发生网络错误。');
+                            console.error('getAddress error:', error);
+                        });
+                    },
+                    (error) => {
+                        let errorMsg = '无法获取您的位置';
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = '用户拒绝了位置权限请求';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = '位置信息不可用';
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = '获取位置超时';
+                                break;
+                            default:
+                                errorMsg = '未知错误';
+                                break;
+                        }
+                        this.$message.error('无法获取您的位置，请检查浏览器设置和权限。(' + errorMsg + ')');
+                        console.error('Geolocation error:', error);
+                    }
+                );
+            } else {
+                this.$message.error('您的浏览器不支持地理定位功能。');
+            }
+        },
         handleChange(value) {
             console.log(value);
             this.idleItemInfo.idlePlace=value[1];
