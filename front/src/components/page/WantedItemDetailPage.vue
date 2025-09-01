@@ -14,7 +14,7 @@
                         <el-descriptions-item label="分类标签">
                             <el-tag size="small">{{ getLabelName(wantedItem.wantedLabel) }}</el-tag>
                         </el-descriptions-item>
-                        <el-descriptions-item label="发布时间">{{ wantedItem.postTime }}</el-descriptions-item>
+                        <el-descriptions-item label="发布时间">{{ wantedItem.releaseTime }}</el-descriptions-item>
                         <el-descriptions-item label="求购状态">
                             <el-tag :type="wantedItem.wantedStatus === 1 ? 'danger' : (wantedItem.wantedStatus === 2 ? 'success' : '')">
                                 {{ wantedItem.wantedStatus === 1 ? '求购中' : (wantedItem.wantedStatus === 2 ? '已找到' : '') }}

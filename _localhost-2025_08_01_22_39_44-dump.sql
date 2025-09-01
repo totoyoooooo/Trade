@@ -424,3 +424,5 @@ UNLOCK TABLES;
 
 ALTER TABLE sh_wanted_item
 ADD COLUMN max_price DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE sh_wanted_item
+ADD COLUMN wanted_label INT NULL COMMENT '分类标签';
