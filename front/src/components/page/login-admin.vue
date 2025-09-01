@@ -59,12 +59,12 @@
 
                     <!-- Login Buttons -->
                     <div class="button-group">
-                        <button class="primary-btn" @click="login" :disabled="!userForm.accountNumber || !userForm.adminPassword">
+                        <button type="button" class="primary-btn" @click="login" :disabled="!userForm.accountNumber || !userForm.adminPassword">
                             <span>登录</span>
                             <i class="el-icon-right"></i>
                         </button>
                         
-                        <button class="secondary-btn" @click="$router.push('/login')">
+                        <button type="button" class="secondary-btn" @click="$router.push('/login')">
                             <span>返回前台</span>
                         </button>
                     </div>

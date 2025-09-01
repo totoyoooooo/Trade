@@ -91,12 +91,12 @@
 
                     <!-- Sign-in Buttons -->
                     <div class="button-group">
-                        <button class="primary-btn" @click="signIn" :disabled="!userInfo.nickname || !userInfo.accountNumber || !userInfo.userPassword || !userPassword2">
+                        <button type="button" class="primary-btn" @click="signIn" :disabled="!userInfo.nickname || !userInfo.accountNumber || !userInfo.userPassword || !userPassword2">
                             <span>注册</span>
                             <i class="el-icon-right"></i>
                         </button>
                         
-                        <button class="secondary-btn" @click="toLogin">
+                        <button type="button" class="secondary-btn" @click="toLogin">
                             <span>返回登录</span>
                         </button>
                     </div>
