@@ -20,6 +20,7 @@
                 <el-dialog
                         title="选择地址"
                         :visible.sync="addressDialogVisible"
+                        :modal="false"
                         width="800px">
                     <el-table
                             stripe
