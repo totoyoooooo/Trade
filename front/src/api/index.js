@@ -405,7 +405,7 @@ const api = {
         return request({
             url: '/message/clearUnread',
             method: 'post',
-            data: query
+            params: query
         });
     },
     createTag(query) {

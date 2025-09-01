@@ -46,7 +46,6 @@ public class ChatController {
                 chatModel.setGetterId(userId);
                 UserModel userModel = userService.getUser(chatModel.getOtherUserId());
                 chatModel.setStatus(WebSocketServer.isOnline(userModel.getId()) ? "在线" : "离线");
-                System.out.println(userModel.getNickname() + chatModel.getStatus());
                 chatModel.setName(userModel.getNickname());
                 chatModel.setAvatar(userModel.getAvatar());
                 List<ChatMessageModel> message = getMessage(chatModel.getId());

@@ -11,11 +11,13 @@
     <result column="idle_label" jdbcType="INTEGER" property="idleLabel" />
     <result column="release_time" jdbcType="TIMESTAMP" property="releaseTime" />
     <result column="idle_status" jdbcType="TINYINT" property="idleStatus" />
+    <result column="tag" jdbcType="VARCHAR" property="idleTag"/>
+    <result column="skim_count" jdbcType="BIGINT" property="skimCount"/>
     <result column="user_id" jdbcType="BIGINT" property="userId" />
   </resultMap>
   <sql id="Base_Column_List">
     id, idle_name, idle_details, picture_list, idle_price, idle_place, idle_label, release_time,
-    idle_status, user_id
+    idle_status, user_id, tag, skim_count
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select
@@ -45,7 +47,7 @@
     select
     <include refid="Base_Column_List" />
     from sh_idle_item
-    where (idle_name LIKE "%"#{findValue}"%" or idle_details LIKE "%"#{findValue}"%") and idle_status = 1 order by id desc limit #{begin}, #{nums}
+    where (idle_name LIKE "%"#{findValue}"%" or idle_details LIKE "%"#{findValue}"%" or tag LIKE "%"#{findValue}"%") and idle_status = 1 order by id desc limit #{begin}, #{nums}
   </select>
   <select id="findIdleItemByLable" resultMap="BaseResultMap">
     select
