@@ -8,7 +8,7 @@
     <result column="max_price" jdbcType="DECIMAL" property="maxPrice" />
     <result column="wanted_place" jdbcType="VARCHAR" property="wantedPlace" />
     <result column="wanted_label" jdbcType="INTEGER" property="wantedLabel" />
-    <result column="post_time" jdbcType="TIMESTAMP" property="postTime" />
+    <result column="release_time" jdbcType="TIMESTAMP" property="releaseTime" />
     <result column="wanted_status" jdbcType="TINYINT" property="wantedStatus" />
     <result column="user_id" jdbcType="BIGINT" property="userId" />
   </resultMap>
@@ -22,8 +22,8 @@
   </resultMap>
 
   <sql id="Base_Column_List">
-    i.id, i.wanted_name, i.wanted_details, i.max_price, i.wanted_place, i.wanted_label, i.post_time, 
-    i.wanted_status, i.user_id, 
+    i.id, i.wanted_name, i.wanted_details, i.max_price, i.wanted_place, i.wanted_label, i.release_time,
+    i.wanted_status, i.user_id,
     u.id as u_id, u.nickname as u_nickname, u.avatar as u_avatar
   </sql>
 
@@ -45,7 +45,7 @@
         and i.wanted_name like concat('%', #{wantedName}, '%')
       </if>
     </where>
-    order by i.post_time desc
+    order by i.release_time desc
     limit #{offset}, #{limit}
   </select>
 
@@ -60,23 +60,23 @@
   </select>
 
   <insert id="insertWantedItem" parameterType="com.second.hand.trading.server.model.WantedItemModel" useGeneratedKeys="true" keyProperty="id">
-    insert into sh_wanted_item (wanted_name, wanted_details, max_price, wanted_place, 
-      wanted_label, post_time, wanted_status, user_id)
-    values (#{wantedName,jdbcType=VARCHAR}, #{wantedDetails,jdbcType=VARCHAR}, #{maxPrice,jdbcType=DECIMAL}, 
-      #{wantedPlace,jdbcType=VARCHAR}, #{wantedLabel,jdbcType=INTEGER}, #{postTime,jdbcType=TIMESTAMP}, 
-      #{wantedStatus,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT})
+    insert into sh_wanted_item (wanted_name, wanted_details, max_price, wanted_place,
+                                wanted_label, release_time, wanted_status, user_id)
+    values (#{wantedName,jdbcType=VARCHAR}, #{wantedDetails,jdbcType=VARCHAR}, #{maxPrice,jdbcType=DECIMAL},
+            #{wantedPlace,jdbcType=VARCHAR}, #{wantedLabel,jdbcType=INTEGER}, #{releaseTime,jdbcType=TIMESTAMP},
+            #{wantedStatus,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT})
   </insert>
 
   <update id="updateWantedItem" parameterType="com.second.hand.trading.server.model.WantedItemModel">
     update sh_wanted_item
     set wanted_name = #{wantedName,jdbcType=VARCHAR},
-      wanted_details = #{wantedDetails,jdbcType=VARCHAR},
-      max_price = #{maxPrice,jdbcType=DECIMAL},
-      wanted_place = #{wantedPlace,jdbcType=VARCHAR},
-      wanted_label = #{wantedLabel,jdbcType=INTEGER},
-      post_time = #{postTime,jdbcType=TIMESTAMP},
-      wanted_status = #{wantedStatus,jdbcType=TINYINT},
-      user_id = #{userId,jdbcType=BIGINT}
+        wanted_details = #{wantedDetails,jdbcType=VARCHAR},
+        max_price = #{maxPrice,jdbcType=DECIMAL},
+        wanted_place = #{wantedPlace,jdbcType=VARCHAR},
+        wanted_label = #{wantedLabel,jdbcType=INTEGER},
+        release_time = #{releaseTime,jdbcType=TIMESTAMP},
+        wanted_status = #{wantedStatus,jdbcType=TINYINT},
+        user_id = #{userId,jdbcType=BIGINT}
     where id = #{id,jdbcType=BIGINT}
   </update>
 

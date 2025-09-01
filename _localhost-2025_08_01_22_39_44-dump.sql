@@ -401,14 +401,17 @@ DROP TABLE IF EXISTS `sh_wanted_item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sh_wanted_item` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `wanted_name` varchar(64) NOT NULL COMMENT '求购物品名称',
-  `wanted_details` varchar(2048) NOT NULL COMMENT '求购详情',
-  `user_id` bigint NOT NULL COMMENT '用户主键id',
-  `release_time` datetime NOT NULL COMMENT '发布时间',
-  `wanted_status` tinyint NOT NULL COMMENT '状态（发布1、下架2、删除0）',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `user_id_index` (`user_id`) USING BTREE
+                                  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+                                  `wanted_name` varchar(64) NOT NULL COMMENT '求购物品名称',
+                                  `wanted_details` varchar(2048) NOT NULL COMMENT '求购详情',
+                                  `max_price` decimal(10,2) DEFAULT 0.00 COMMENT '最高预算',
+                                  `wanted_place` varchar(255) NULL COMMENT '期望交易地点',
+                                  `wanted_label` int NULL COMMENT '分类标签',
+                                  `release_time` datetime NOT NULL COMMENT '发布时间',
+                                  `wanted_status` tinyint NOT NULL COMMENT '状态（发布1、已找到2、过期3、删除0）',
+                                  `user_id` bigint NOT NULL COMMENT '用户主键id',
+                                  PRIMARY KEY (`id`) USING BTREE,
+                                  KEY `user_id_index` (`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -418,11 +421,12 @@ CREATE TABLE `sh_wanted_item` (
 
 LOCK TABLES `sh_wanted_item` WRITE;
 /*!40000 ALTER TABLE `sh_wanted_item` DISABLE KEYS */;
+INSERT INTO `sh_wanted_item` VALUES
+                                 (1,'1','求购详情1',0.10,'1',1,'2025-09-01 20:23:00',1,11),
+                                 (2,'高等数学','求购高等数学教材',10.00,'二里半',2,'2025-09-01 20:24:00',1,11),
+                                 (3,'考研英语','求购考研英语复习资料',20.00,'天马',1,'2025-09-01 20:25:00',1,11);
 /*!40000 ALTER TABLE `sh_wanted_item` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
-ALTER TABLE sh_wanted_item
-ADD COLUMN max_price DECIMAL(10, 2) DEFAULT 0.00;
-ALTER TABLE sh_wanted_item
-ADD COLUMN wanted_label INT NULL COMMENT '分类标签';
+

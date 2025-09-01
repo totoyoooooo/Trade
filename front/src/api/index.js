@@ -23,10 +23,11 @@ const api = {
             data: data
         });
     },
-    getUserInfo() {
+    getUserInfo(query) {
         return request({
             url: '/user/info',
             method: 'get',
+            params: query
         });
     },
     getUser(query) {
@@ -369,7 +370,7 @@ const api = {
         return request({
             url: '/chat/getChatList',
             method: 'post',
-            params: query
+            data: query
         });
     },
     openChat(query) {
@@ -390,7 +391,7 @@ const api = {
         return request({
             url: '/chat/clearUnread',
             method: 'post',
-            params: query
+            data: query
         });
     },
     revokeMessage(query) {
@@ -404,7 +405,7 @@ const api = {
         return request({
             url: '/message/clearUnread',
             method: 'post',
-            params: query
+            data: query
         });
     },
     createTag(query) {
@@ -417,15 +418,15 @@ const api = {
     getAkinTag(query) {
         return request({
             url: '/tag/getAkinTag',
-            method: 'get',
-            params: query
+            method: 'post',
+            data: query
         });
     },
     getAllTag(query) {
         return request({
             url: '/tag/getAllTag',
-            method: 'get',
-            params: query
+            method: 'post',
+            data: query
         });
     },
     addShield(data) {
