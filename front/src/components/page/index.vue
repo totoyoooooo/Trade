@@ -197,6 +197,7 @@ export default {
             this.loading = true;
             if (this.labelName > 0) {
                 this.$api.findIdleTiemByLable({
+                    userId: this.getCookie('shUserId'),
                     idleLabel: this.labelName,
                     page: page,
                     nums: 8
@@ -216,6 +217,7 @@ export default {
                 })
             } else {
                 this.$api.findIdleTiem({
+                    userId: this.getCookie('shUserId'),
                     page: page,
                     nums: 8
                 }).then(res => {

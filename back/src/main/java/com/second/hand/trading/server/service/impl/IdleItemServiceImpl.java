@@ -5,6 +5,7 @@ import com.second.hand.trading.server.model.IdleItemModel;
 import com.second.hand.trading.server.model.TagModel;
 import com.second.hand.trading.server.model.UserModel;
 import com.second.hand.trading.server.service.IdleItemService;
+import com.second.hand.trading.server.tag.TagUtils;
 import com.second.hand.trading.server.vo.PageVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -178,101 +179,134 @@ public class IdleItemServiceImpl implements IdleItemService {
      */
     @Override
     public List<IdleItemModel> getIdleItemList(Long userId,List<IdleItemModel> list) {
-        // Default values
-        Map<TagModel, Double> tagMap = new HashMap<>();
-        double idleItemRatio = 0.7;
-
-        UserModel userModel = null;
-        if (userId != null) {
-            userModel = userDao.selectByPrimaryKey(userId);
-        }
-
-        if (userModel != null) {
-            // 获取所有标签
-            // 获取标签推荐度Map
-            // 更新标签推荐度值 (基于 simplified tagMap)
-            // double finalTotal1 = Math.abs(tagMap.values().stream().mapToDouble(Double::doubleValue).sum() == 0 ? 1 : tagMap.values().stream().mapToDouble(Double::doubleValue).sum());
-            // tagMap.forEach((key, value) -> tagMap.put(key, (value / finalTotal1) * 100));
-
-            // 简化推荐逻辑，不再依赖 collectTag, skimTag 等字段
-            // int userCollectCount = TagUtils.getTagCount(userModel.getCollectTag());
-            // int userSkimCount = TagUtils.getTagCount(userModel.getSkimTag());
-            // List<Integer> collectCountList = new ArrayList<>();
-            // List<Integer> skimCountList = new ArrayList<>();
-            // for (UserModel i : userDao.getUserList()) {
-            //     int skimCount = TagUtils.getTagCount(i.getSkimTag());
-            //     int collectCount = TagUtils.getTagCount(i.getCollectTag());
-            //     collectCountList.add(collectCount);
-            //     skimCountList.add(skimCount);
-            // }
-            // collectCountList.sort(Comparator.reverseOrder());
-            // skimCountList.sort(Comparator.reverseOrder());
-            // int collectP20Count = getQuantile(collectCountList, 20);
-            // int skimP20Count = getQuantile(skimCountList, 20);
-            // int collectP70Count = getQuantile(collectCountList, 70);
-            // int skimP70Count = getQuantile(skimCountList, 70);
-            // if (userCollectCount >= collectP20Count && userSkimCount >= skimP20Count) {
-            //     double collectDivide = collectP70Count - collectP20Count == 0 ? 1 : collectP70Count - collectP20Count;
-            //     double skimDivide = skimP70Count - skimP20Count == 0 ? 1 : skimP70Count - skimP20Count;
-            //     double blendRatio = Math.min(1, (((userCollectCount - collectP20Count) / collectDivide) + ((userSkimCount - skimP20Count) / skimDivide)) / 2);
-            //     idleItemRatio = 0.7 - 0.3 * blendRatio;
-            //     tagRatio = 0.3 + 0.3 * blendRatio;
-            // }
-        }
-
-        Map<IdleItemModel, Double> sortMap = new LinkedHashMap<>();
-        for (IdleItemModel i : list) {
-            if (i.getIdleStatus() != 1) continue;
-            UserModel um = userDao.selectByPrimaryKey(i.getUserId());
-            if (um == null) {
-                // 如果找不到发布者信息，则使用默认值，避免空指针
-                i.setUser(null); // 或者设置一个默认的用户对象
-                sortMap.put(i, (double) favoriteDao.getFavoriteByIdleItem(i.getId()).size() * 3L + 0L + 0); // tradeCount * applauseRate = 0
-                continue;
+        if(userId != null){
+            //获取用户信息
+            UserModel userModel = userDao.selectByPrimaryKey(userId);
+            //获取所有标签
+            List<TagModel> allTagList = tagDao.getAllTag();
+            //获取标签推荐度Map
+            Map<TagModel,Double> tagMap = TagUtils.getTagRecommendation(userModel,allTagList);
+            //更新标签推荐度值
+            double finalTotal1 = Math.abs(tagMap.values().stream()
+                    .mapToDouble(Double::doubleValue)
+                    .sum() == 0 ? 1 : tagMap.values().stream()
+                    .mapToDouble(Double::doubleValue)
+                    .sum());
+            tagMap.forEach((key, value) -> tagMap.put(key, (value / finalTotal1) * 100));
+            //获取用户收藏量和浏览量
+            int userCollectCount = TagUtils.getTagCount(userModel.getCollectTag());
+            int userSkimCount = TagUtils.getTagCount(userModel.getSkimTag());
+            //获取用户分位数列表
+            List<Integer> collectCountList = new ArrayList<>();
+            List<Integer> skimCountList = new ArrayList<>();
+            for(UserModel i : userDao.getUserList()){
+                int skimCount = TagUtils.getTagCount(i.getSkimTag());
+                int collectCount = TagUtils.getTagCount(i.getCollectTag());
+                collectCountList.add(collectCount);
+                skimCountList.add(skimCount);
             }
-            i.setUser(um);
-            int collectedCount = favoriteDao.getFavoriteByIdleItem(i.getId()).size();
-            Long skimCount = 0L;
-            // 将 tradeCount 和 applauseRate 视为 0，因为这些字段已不存在
-            Long tradeCount = 0L;
-            int applauseRate = 0;
-            sortMap.put(i, (double) collectedCount * 3L + skimCount + tradeCount * applauseRate);
-        }
-
-        // 更新商品推荐度值
-        double finalTotal = Math.abs(sortMap.values().stream()
-                .mapToDouble(Double::doubleValue)
-                .sum() == 0 ? 1 : sortMap.values().stream()
-                .mapToDouble(Double::doubleValue)
-                .sum());
-        Map<IdleItemModel, Double> finalSortMap = sortMap;
-        finalSortMap.forEach((key, value) -> finalSortMap.put(key, (value / finalTotal) * 100));
-        System.out.println("标签推荐度:" + tagMap);
-        System.out.println("商品推荐度:" + finalSortMap);
-
-        Map<IdleItemModel, Double> ans = new LinkedHashMap<>();
-        for (Map.Entry<IdleItemModel, Double> e : finalSortMap.entrySet()) {
-            double finalRecommendation = e.getValue() * idleItemRatio;
-            if (userModel != null) { // 只有在用户存在的情况下才计算标签推荐
-                // List<String> idleTags = TagUtils.splitTagText(e.getKey().getIdleTag()); // 移除对不存在字段的依赖
-                // for (String tagText : idleTags) {
-                //     for (Map.Entry<TagModel, Double> tagEntry : tagMap.entrySet()) {
-                //         if (tagText.equals(tagEntry.getKey().getText())) {
-                //             finalRecommendation += tagEntry.getValue() * tagRatio;
-                //             break;
-                //         }
-                //     }
-                // }
+            collectCountList.sort(Comparator.reverseOrder());
+            skimCountList.sort(Comparator.reverseOrder());
+            //获取20分位数和70分位数
+            int collectP20Count = getQuantile(collectCountList,20);
+            int skimP20Count = getQuantile(skimCountList,20);
+            int collectP70Count = getQuantile(collectCountList,70);
+            int skimP70Count = getQuantile(skimCountList,70);
+            //商品权重和标签权重
+            double idleItemRatio = 0.7;
+            double tagRatio = 0.3;
+            //根据收藏量和浏览量计算参数
+            if(userCollectCount >= collectP20Count && userSkimCount >= skimP20Count){
+                double collectDivide = collectP70Count - collectP20Count == 0 ? 1 : collectP70Count - collectP20Count;
+                double skimDivide = skimP70Count - skimP20Count == 0 ? 1 : skimP70Count - skimP20Count;
+                double blendRatio = Math.min(1,(((userCollectCount - collectP20Count) / collectDivide) + ((userSkimCount - skimP20Count) / skimDivide)) / 2);
+                idleItemRatio = 0.7 - 0.3 * blendRatio;
+                tagRatio = 0.3 + 0.3 * blendRatio;
             }
-            ans.put(e.getKey(), finalRecommendation);
+            //排序map
+            Map<IdleItemModel,Double> sortMap = new LinkedHashMap<>();
+            for(IdleItemModel i : list){
+                if(i.getIdleStatus() != 1) continue;
+                UserModel um = userDao.selectByPrimaryKey(i.getUserId());
+                int collectedCount = favoriteDao.getFavoriteByIdleItem(i.getId()).size();
+                Long skimCount = i.getSkimCount();
+                Long tradeCount = um.getTradeCount();
+                int applauseRate = um.getApplauseRate();
+                sortMap.put(i, (double) collectedCount * 3L + skimCount + tradeCount * applauseRate);
+            }
+            //更新商品推荐度值
+            double finalTotal = Math.abs(sortMap.values().stream()
+                    .mapToDouble(Double::doubleValue)
+                    .sum() == 0 ? 1 : sortMap.values().stream()
+                    .mapToDouble(Double::doubleValue)
+                    .sum());
+            Map<IdleItemModel, Double> finalSortMap = sortMap;
+            finalSortMap.forEach((key, value) -> finalSortMap.put(key, (value / finalTotal) * 100));
+            System.out.println("标签推荐度:" + tagMap);
+            System.out.println("商品推荐度:" + finalSortMap);
+            Map<IdleItemModel,Double> ans = new LinkedHashMap<>();
+            for(Map.Entry<IdleItemModel,Double> e : finalSortMap.entrySet()){
+                double finalRecommendation = e.getValue() * idleItemRatio;
+                List<String> idleTags = TagUtils.splitTagText(e.getKey().getIdleTag());
+                for(String i : idleTags){
+                    for(Map.Entry<TagModel,Double> e1 : tagMap.entrySet()){
+                        if(i.equals(e1.getKey().getText())){
+                            finalRecommendation += e1.getValue() * tagRatio;
+                            break;
+                        }
+                    }
+                }
+                ans.put(e.getKey(),finalRecommendation);
+            }
+            System.out.println("最终推荐度为" + ans);
+            List<IdleItemModel> sortedIdle = ans.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+            return sortedIdle;
+        }else{
+            //排序map
+            Map<IdleItemModel,Double> sortMap = new LinkedHashMap<>();
+            for(IdleItemModel i : list){
+                if(i.getIdleStatus() != 1) continue;
+                UserModel um = userDao.selectByPrimaryKey(i.getUserId());
+                int collectedCount = favoriteDao.getFavoriteByIdleItem(i.getId()).size();
+                Long skimCount = i.getSkimCount();
+                Long tradeCount = um.getTradeCount();
+                int applauseRate = um.getApplauseRate();
+                sortMap.put(i, (double) collectedCount * 3L + skimCount + tradeCount * applauseRate);
+            }
+            sortMap = sortMap.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.<IdleItemModel, Double>comparingByValue().reversed())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (e1, e2) -> e1,
+                            LinkedHashMap::new));
+            System.out.println("商品推荐度为:" + sortMap);
+            //更新商品推荐度值
+            double finalTotal = Math.abs(sortMap.values().stream()
+                    .mapToDouble(Double::doubleValue)
+                    .sum() == 0 ? 1 : sortMap.values().stream()
+                    .mapToDouble(Double::doubleValue)
+                    .sum());
+            Map<IdleItemModel, Double> finalSortMap = sortMap;
+            finalSortMap.forEach((key, value) -> finalSortMap.put(key, (value / finalTotal) * 100));
+            System.out.println("最终推荐度为:" + finalSortMap);
+            return new ArrayList<>(finalSortMap.keySet());
         }
-        System.out.println("最终推荐度为" + ans);
-        List<IdleItemModel> sortedIdle = ans.entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-        return sortedIdle;
+    }
+
+    private int getQuantile(List<Integer> list,int quantile){
+        int size = list.size();
+        if(size == 0 || quantile < 0 || quantile > 1) return -1;
+        double index = (size - 1) * quantile;
+        int lowerIndex = (int) Math.floor(index);
+        int upperIndex = (int) Math.ceil(index);
+        if(lowerIndex == upperIndex) return list.get(lowerIndex);
+        return (int) Math.round(list.get(lowerIndex) + (list.get(upperIndex) - list.get(lowerIndex)) * (index - lowerIndex));
     }
 
 }

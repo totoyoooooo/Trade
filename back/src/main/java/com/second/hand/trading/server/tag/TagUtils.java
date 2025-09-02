@@ -29,7 +29,7 @@ public class TagUtils {
         List<String> tags = splitTagText(tagText);
         ObjectMapper objectMapper = new ObjectMapper();
         List<TagObject> list = new ArrayList<>();
-        if(tagObjects == null || tagObjects.isEmpty()){
+        if(tagObjects.isEmpty()){
             for(String t : tags){
                 TagObject tag = new TagObject(t,1L,"");
                 tag.setTime();

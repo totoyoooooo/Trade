@@ -9,9 +9,16 @@
     <result column="avatar" jdbcType="VARCHAR" property="avatar" />
     <result column="sign_in_time" jdbcType="TIMESTAMP" property="signInTime" />
     <result column="user_status" jdbcType="TINYINT" property="userStatus"/>
+    <result column="collect_tag" jdbcType="VARCHAR" property="collectTag"/>
+    <result column="skim_tag" jdbcType="VARCHAR" property="skimTag"/>
+    <result column="shield_tag" jdbcType="VARCHAR" property="shieldTag"/>
+    <result column="decrease_tag" jdbcType="VARCHAR" property="decreaseTag"/>
+    <result column="issue_tag" jdbcType="VARCHAR" property="issueTag"/>
+    <result column="trade_count" jdbcType="BIGINT" property="tradeCount"/>
+    <result column="applause_rate" jdbcType="INTEGER" property="applauseRate"/>
   </resultMap>
   <sql id="Base_Column_List">
-    id, account_number, nickname, avatar, sign_in_time, user_status
+    id, account_number, nickname, avatar, sign_in_time, user_status, skim_tag, collect_tag, issue_tag, shield_tag, decrease_tag, trade_count, applause_rate
   </sql>
   <select id="getUserByAccountNumber" resultMap="BaseResultMap">
     select id, account_number, nickname, avatar, sign_in_time, user_status
