@@ -79,9 +79,6 @@
                                     </div>
                                     <span class="seller-name">{{ idle.user.nickname }}</span>
                                     <div class="product-actions">
-                                        <button class="action-btn favorite">
-                                            <i class="el-icon-star-off"></i>
-                                        </button>
                                     </div>
                                 </div>
                             </div>

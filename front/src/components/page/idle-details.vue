@@ -41,10 +41,10 @@
                         <el-image v-for="(imgUrl, i) in idleItemInfo.pictureList" :key="i"
                             style="width: 90%;margin-bottom: 2px; cursor: pointer;" :src="imgUrl" fit="contain"
                             :preview-src-list="[]" @click.native="openPreview(i)" />
-                        <el-dialog :visible.sync="previewVisible" width="60%" top="5vh" :show-close="false"
+                        <el-dialog :visible.sync="previewVisible" width="60%" top="5vh" :show-close="false" :modal="false"
                             @close="closePreview" v-if="previewVisible" class="image-preview-dialog">
                             <img :src="idleItemInfo.pictureList[previewIndex]" style="width: 100%; cursor: zoom-out;"
-                                @click="closePreview" />
+                                @click="closePreview"/>
                         </el-dialog>
                     </div>
                 </div>
