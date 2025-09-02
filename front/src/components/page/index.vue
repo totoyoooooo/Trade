@@ -102,7 +102,7 @@
                             background
                             @current-change="handleCurrentChange"
                             :current-page.sync="currentPage"
-                            :page-size="8"
+                            :page-size="9"
                             layout="prev, pager, next, jumper"
                             :total="totalItem"
                             class="custom-pagination">
@@ -197,7 +197,7 @@ export default {
                     userId: this.getCookie('shUserId'),
                     idleLabel: this.labelName,
                     page: page,
-                    nums: 8
+                    nums: 9
                 }).then(res => {
                     let list = res.data.list;
                     for (let i = 0; i < list.length; i++) {
@@ -216,7 +216,7 @@ export default {
                 this.$api.findIdleTiem({
                     userId: this.getCookie('shUserId'),
                     page: page,
-                    nums: 8
+                    nums: 9
                 }).then(res => {
                     let list = res.data.list;
                     for (let i = 0; i < list.length; i++) {
